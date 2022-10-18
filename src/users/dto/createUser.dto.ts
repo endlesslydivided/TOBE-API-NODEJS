@@ -15,7 +15,7 @@ export class CreateUserDto
   readonly email:string;
 
   @ApiProperty({example:'12345',description:"User's password"})
-  passwordHash:string;
+  password:string;
 
   @ApiProperty({example:'+375336947859',description:"User's phone number"})
   readonly phoneNumber:string;

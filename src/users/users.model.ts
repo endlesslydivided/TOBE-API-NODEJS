@@ -1,5 +1,7 @@
-import {  Column, DataType, Default, Model, Table } from "sequelize-typescript";
+import { BelongsToMany, Column, DataType, Default, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
+import { Role } from "../roles/roles.model";
+import { UserRoles } from "../roles/userRoles.model";
 
 interface UserCreationAttribute
 {
@@ -7,7 +9,7 @@ interface UserCreationAttribute
   lastName:string;
   username:string;
   email:string;
-  passwordHash:string;
+  password:string;
   phoneNumber:string;
 }
 
@@ -41,7 +43,7 @@ export class User extends Model<User,UserCreationAttribute>
 
   @ApiProperty({example:'12345',description:"User's password hash"})
   @Column({type:DataType.STRING,unique:true,allowNull:false})
-  passwordHash:string;
+  password:string;
 
   @ApiProperty({example:'12345',description:"User's password hash salt"})
   @Column({type:DataType.STRING,unique:true,allowNull:false})
@@ -64,5 +66,8 @@ export class User extends Model<User,UserCreationAttribute>
   @ApiProperty({example:'0',description:"Failed attempts to access users account"})
   @Default(0)
   @Column({type:DataType.INTEGER})
-  accessFailedCount:number;
+  accessFailedCount:number
+
+  @BelongsToMany(() => Role,() => UserRoles)
+  roles:Role[];
 }
