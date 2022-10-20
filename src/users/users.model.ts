@@ -1,7 +1,23 @@
-import { BelongsToMany, Column, DataType, Default, Model, Table } from "sequelize-typescript";
+import {
+  BelongsTo,
+  BelongsToMany,
+  Column,
+  DataType,
+  Default,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table
+} from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { Role } from "../roles/roles.model";
 import { UserRoles } from "../roles/userRoles.model";
+import { Dialog } from "../dialogs/dialogs.model";
+import { UserDialog } from "../dialogs/userDialogs.model";
+import { Message } from "../messages/messages.model";
+import { Post } from "../posts/posts.model";
+import { Album } from "../albums/albums.model";
+import { Photo } from "../photos/photos.model";
 
 interface UserCreationAttribute
 {
@@ -63,11 +79,36 @@ export class User extends Model<User,UserCreationAttribute>
   @Column({type:DataType.BOOLEAN,allowNull:false})
   twoFactorEnabled:boolean;
 
-  @ApiProperty({example:'0',description:"Failed attempts to access users account"})
+  @ApiProperty({example:'0',description:"Failed attempts to access user's account"})
   @Default(0)
   @Column({type:DataType.INTEGER})
   accessFailedCount:number
 
+  @ApiProperty({example:'0',description:"ID of main photo"})
+  @ForeignKey(() => Photo)
+  @Column({type:DataType.INTEGER})
+  mainPhoto:number;
+
   @BelongsToMany(() => Role,() => UserRoles)
   roles:Role[];
+
+  @BelongsToMany(() => Dialog,() => UserDialog)
+  dialogs:Dialog[];
+
+  @BelongsTo(() => Photo,"mainPhoto")
+  photo:Dialog[];
+
+  @HasMany(() => Dialog, "creatorId")
+  createdDialogs: Dialog[];
+
+  @HasMany(() => Message, "userId")
+  messages: Message[];
+
+  @HasMany(() => Post, "userId")
+  posts: Post[];
+
+  @HasMany(() => Album, "userId")
+  albums: Album[];
+
+
 }
