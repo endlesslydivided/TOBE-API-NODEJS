@@ -2,7 +2,6 @@ import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { User } from "./users.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreateUserDto } from "./dto/createUser.dto";
-import { genSalt, hash } from "bcrypt";
 import { RolesService } from "../roles/roles.service";
 import { AddRoleDto } from "./dto/addRole.dto";
 

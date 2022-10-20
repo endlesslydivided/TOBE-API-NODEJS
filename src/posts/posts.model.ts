@@ -1,9 +1,6 @@
-import { BelongsToMany, Column, DataType, Default, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "../roles/roles.model";
-import { UserRoles } from "../roles/userRoles.model";
-import { Attachment} from "../attachments/attachments.model";
-import { Dialog } from "../dialogs/dialogs.model";
+import { Attachment } from "../attachments/attachments.model";
 import { User } from "../users/users.model";
 import { Category } from "../category/category.model";
 import { Tag } from "../tags/tags.model";

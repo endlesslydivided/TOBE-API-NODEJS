@@ -1,8 +1,5 @@
-import { AfterFind, BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
-import { Role } from "../roles/roles.model";
-import { User } from "../users/users.model";
+import { AfterFind, BelongsTo, Column, DataType, Model, Table } from "sequelize-typescript";
 import { Post } from "../posts/posts.model";
-import { UserRoles } from "../roles/userRoles.model";
 import { Message } from "../messages/messages.model";
 import { ApiProperty } from "@nestjs/swagger";
 

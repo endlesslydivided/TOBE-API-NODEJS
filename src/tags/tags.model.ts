@@ -1,23 +1,7 @@
-import {
-  AfterFind,
-  BelongsTo,
-  BelongsToMany,
-  Column,
-  DataType,
-  Default,
-  ForeignKey,
-  HasMany,
-  Model,
-  Table
-} from "sequelize-typescript";
+import { AfterFind, BelongsTo, Column, DataType, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "../roles/roles.model";
-import { UserRoles } from "../roles/userRoles.model";
-import { Dialog } from "../dialogs/dialogs.model";
-import { UserDialog } from "../dialogs/userDialogs.model";
 import { Message } from "../messages/messages.model";
 import { Post } from "../posts/posts.model";
-import { Album } from "../albums/albums.model";
 import { Photo } from "../photos/photos.model";
 
 interface TagCreationAttribute

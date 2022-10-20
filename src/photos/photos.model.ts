@@ -1,18 +1,7 @@
-import {
-  BelongsToMany,
-  Column,
-  DataType,
-  Default,
-  ForeignKey,
-  HasMany,
-  HasOne,
-  Model,
-  Table
-} from "sequelize-typescript";
+import { Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../users/users.model";
 import { Album } from "../albums/albums.model";
-import { Attachment } from "../attachments/attachments.model";
 import { Tag } from "../tags/tags.model";
 
 interface AlbumCreationAttribute

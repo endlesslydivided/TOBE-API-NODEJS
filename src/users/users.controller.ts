@@ -3,7 +3,6 @@ import { CreateUserDto } from "./dto/createUser.dto";
 import { UsersService } from "./users.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { User } from "./users.model";
-import { JwtAuthGuard } from "../auth/jwtAuth.guard";
 import { Roles } from "../auth/roleAuth.decorator";
 import { RolesGuard } from "../auth/roles.guard";
 import { AddRoleDto } from "./dto/addRole.dto";
