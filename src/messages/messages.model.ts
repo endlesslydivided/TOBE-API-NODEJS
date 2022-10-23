@@ -38,6 +38,6 @@ export class Message extends Model<Message,MessageCreationAttribute>
   attachments:Attachment[]
 
   @HasMany(() => Tag,{foreignKey:"taggableId",scope: { taggableType: "message" },
-    constraints:true,onDelete:"set null",onUpdate:"cascade"})
+                                                    constraints:true,onDelete:"set null",onUpdate:"cascade"})
   tags:Tag[]
 }

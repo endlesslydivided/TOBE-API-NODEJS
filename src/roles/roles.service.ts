@@ -17,6 +17,10 @@ export class RolesService {
   async getRoleByName(name:string)
   {
     return await this.roleRepository.findOne({where:{name}});
+  }
 
+  async getRoleById(id:number)
+  {
+    return await this.roleRepository.findByPk(id);
   }
 }

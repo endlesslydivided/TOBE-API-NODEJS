@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, UseGuards, UseInterceptors, UsePipes } from "@nestjs/common";
 import { CreateUserDto } from "./dto/createUser.dto";
 import { UsersService } from "./users.service";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
@@ -29,12 +29,22 @@ export class UsersController {
   @ApiOperation({summary:"Get all users"})
   @ApiResponse({status:200,type:[User]})
   @UseGuards(RolesGuard)
-  @Roles("ADMIN")
+  // @Roles("ADMIN")
   @Get()
   getAll()
   {
     return this.userService.getAllUser();
   }
+
+  // @ApiOperation({summary:"Delete album by userId"})
+  // @ApiResponse({status:204,type:[User]})
+  // @UseGuards(RolesGuard)
+  // // @Roles("ADMIN")
+  // @Delete('/:userId/albums/:albumId')
+  // deleteAlbumByUser(@Param('userId') userId: number,@Param('albumId') albumId)
+  // {
+  //   return this.albumService.deleteById();
+  // }
 
   @ApiOperation({summary:"Give user a role"})
   @ApiResponse({status:200})

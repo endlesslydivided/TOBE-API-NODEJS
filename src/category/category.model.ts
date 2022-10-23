@@ -18,8 +18,7 @@ export class Category extends Model<Category,CategoryCreationAttribute>
   @Column({type:DataType.STRING,allowNull:false})
   name:string;
 
-  @HasMany(() => Post,{foreignKey:"categoryId",
-                                                    constraints:true,onDelete:"set null",onUpdate:"cascade"})
+  @HasMany(() => Post,{foreignKey:"categoryId",constraints:true,onDelete:"set null",onUpdate:"cascade"})
   posts:Post[]
 
 }

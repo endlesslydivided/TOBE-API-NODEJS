@@ -31,16 +31,17 @@ import { Photo } from "./photos/photos.model";
 import { Album } from "./albums/albums.model";
 import { TagsModule } from "./tags/tags.module";
 import { Tag } from "./tags/tags.model";
+import { FilesModule } from './files/files.module';
 
 @Module(    {
-  controllers: [MessagesController, AlbumsController, PhotosController],
-  providers: [MessagesService, AlbumsService, PhotosService, CategoryService],
+  controllers: [],
+  providers: [],
   imports:[
     ConfigModule.forRoot({
       envFilePath: `.${process.env.NODE_ENV}.env`
     }),
     SequelizeModule.forRoot({
-
+      logging: false,
       dialect:'postgres',
       host:process.env.POSTGRES_HOST,
       port: Number(process.env.POSTGRES_PORT),
@@ -61,7 +62,8 @@ import { Tag } from "./tags/tags.model";
     AlbumsModule,
     PhotosModule,
     CategoryModule,
-    TagsModule
+    TagsModule,
+    FilesModule
   ]
 }
 )

@@ -30,6 +30,7 @@ export class Album extends Model<Album,AlbumCreationAttribute>
   @Column({type:DataType.INTEGER})
   userId:number
 
-  @HasMany(() => Photo, "albumId")
+  @HasMany(() => Photo, {foreignKey:"albumId",
+    constraints:true,onDelete:"cascade",onUpdate:"cascade"})
   photos: Photo[];
 }

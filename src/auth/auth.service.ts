@@ -51,6 +51,6 @@ export class AuthService {
     {
       return user;
     }
-    throw new UnauthorizedException({message: 'Неккоректные email или парль'});
+    throw new UnauthorizedException({message: 'Неккоректные email или пароль'});
   }
 }
