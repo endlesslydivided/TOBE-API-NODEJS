@@ -1,4 +1,4 @@
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { AttachmentsController } from "./attachments.controller";
 import { AttachmentsService } from "./attachments.service";
 import { SequelizeModule } from "@nestjs/sequelize";
@@ -13,7 +13,7 @@ import { FilesModule } from "../files/files.module";
   imports:
     [
       SequelizeModule.forFeature([Message,Post,Attachment]),
-      FilesModule
+      forwardRef(()=> FilesModule)
     ],
   exports:
     [

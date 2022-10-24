@@ -8,15 +8,21 @@ import { UserRoles } from "../roles/userRoles.model";
 import { RolesModule } from "../roles/roles.module";
 import { AuthModule } from "../auth/auth.module";
 import { AlbumsService } from "../albums/albums.service";
+import { AlbumsModule } from "../albums/albums.module";
+import { Album } from "../albums/albums.model";
+import { Message } from "../messages/messages.model";
+import { Photo } from "../photos/photos.model";
+import { Dialog } from "../dialogs/dialogs.model";
+import { Post } from "../posts/posts.model";
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
   imports:
     [
-      SequelizeModule.forFeature([User,Role,UserRoles]),
-      RolesModule,
-      AlbumsService,
+      SequelizeModule.forFeature([User,Role,UserRoles,Album,Message,Photo,Dialog,Post]),
+      forwardRef(() => RolesModule),
+      forwardRef(() => AlbumsModule),
       forwardRef(() => AuthModule)
     ],
   exports:

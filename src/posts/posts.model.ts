@@ -35,12 +35,12 @@ export class Post extends Model<Post,PostCreationAttribute>
 
   @ApiProperty({example:'0',description:"ID of post category"})
   @ForeignKey(() => Category)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   categoryId:number
 
   @ApiProperty({example:'0',description:"ID of post user"})
   @ForeignKey(() => User)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   userId:number
 
   @HasMany(() => Attachment,{foreignKey:"attachableId",scope: { attachableType: "post" },

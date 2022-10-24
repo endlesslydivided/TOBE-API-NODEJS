@@ -95,19 +95,24 @@ export class User extends Model<User,UserCreationAttribute>
   @BelongsToMany(() => Dialog,() => UserDialog)
   dialogs:Dialog[];
 
-  @BelongsTo(() => Photo,"mainPhoto")
+  @BelongsTo(() => Photo,{foreignKey:"mainPhoto",
+    constraints:true,onDelete:"set null",onUpdate:"cascade"})
   photo:Dialog[];
 
-  @HasMany(() => Dialog, "creatorId")
+  @HasMany(() => Dialog, {foreignKey:"creatorId",
+  constraints:true,onDelete:"set null",onUpdate:"cascade"})
   createdDialogs: Dialog[];
 
-  @HasMany(() => Message, "userId")
+  @HasMany(() => Message, {foreignKey:"userId",
+    constraints:true,onDelete:"set null",onUpdate:"cascade"})
   messages: Message[];
 
-  @HasMany(() => Post, "userId")
+  @HasMany(() => Post, {foreignKey:"userId",
+    constraints:true,onDelete:"set null",onUpdate:"cascade"})
   posts: Post[];
 
-  @HasMany(() => Album, "userId")
+  @HasMany(() => Album, {foreignKey:"userId",
+    constraints:true,onDelete:"set null",onUpdate:"cascade"})
   albums: Album[];
 
 

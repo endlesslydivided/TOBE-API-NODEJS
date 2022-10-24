@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards, UsePipes } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UsersService } from "../users/users.service";
 import { User } from "../users/users.model";
@@ -24,6 +24,7 @@ export class AlbumsController {
   @ApiOperation({summary:"Album creation"})
   @ApiResponse({status:200,type:Album})
   @UsePipes(ValidationPipe)
+  @HttpCode(HttpStatus.CREATED)
   @Post()
   createAlbum(@Body() albumDto: CreateAlbumDto)
   {
@@ -32,6 +33,7 @@ export class AlbumsController {
 
   @ApiOperation({summary:"Update album by id"})
   @ApiResponse({status:200,type:Album})
+  @HttpCode(HttpStatus.OK)
   @Put(`/:id`)
   updateAlbum(@Body() albumDto: UpdateAlbumDto,@Param('id') id:number)
   {
@@ -42,6 +44,7 @@ export class AlbumsController {
   @ApiResponse({status:200})
   @UseGuards(RolesGuard)
   @Roles("ADMIN")
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Get('/:id')
   deleteAlbum(@Param('id') id:number)
   {

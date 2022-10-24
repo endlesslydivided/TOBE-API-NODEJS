@@ -29,7 +29,7 @@ export class Dialog extends Model<Dialog,DialogCreationAttribute>
 
   @ApiProperty({example:'0',description:"ID of user, who created a dialog"})
   @ForeignKey(() => User)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   creatorId:number
 
   @BelongsToMany(() => User,() => UserDialog)

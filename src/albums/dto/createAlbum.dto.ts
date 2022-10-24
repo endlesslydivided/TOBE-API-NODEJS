@@ -5,11 +5,7 @@ import { User } from "../../users/users.model";
 
 export class CreateAlbumDto
 {
-  @ApiProperty({example:'0',description:"ID of album"})
-  @IsNumber({},{message:"Должно быть числом"})
-  id:number
-
-  @ApiProperty({example:'Alexander',description:"Album name"})
+  @ApiProperty({example:'My first album name',description:"Album name"})
   @IsString({message: "Должно быть строкой"})
   @Length(0,50,{message:"Длина названия альбома: до 50 символов"})
   name:string;

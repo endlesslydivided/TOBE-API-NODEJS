@@ -21,7 +21,7 @@ export class AlbumsService {
     {
       return await this.albumRepository.create(dto);
     }
-    throw new HttpException('Пользователь не найден',HttpStatus.NOT_FOUND);
+    throw new HttpException('Альбом не создан: пользователь не найден',HttpStatus.NOT_FOUND);
   }
 
   async updateAlbum(id:number,dto: UpdateAlbumDto)
@@ -41,7 +41,7 @@ export class AlbumsService {
     {
       return await this.albumRepository.findAll<Album>({where: {userId}});
     }
-    throw new HttpException('Пользователь не найден',HttpStatus.NOT_FOUND);
+    throw new HttpException('Альбомы не найдены: пользователь не найден',HttpStatus.NOT_FOUND);
   }
 
   async getById(id:number)
@@ -59,10 +59,9 @@ export class AlbumsService {
     const album = await this.albumRepository.findByPk(id);
     if(album)
     {
-      await this.albumRepository.destroy({where :{id}});
-      return HttpStatus.NO_CONTENT;
+      return await this.albumRepository.destroy({where :{id}});
     }
-    throw new HttpException('Альбом не найден',HttpStatus.NOT_FOUND);
+    throw new HttpException('Альбом для удаления не найден',HttpStatus.NOT_FOUND);
   }
 
 }

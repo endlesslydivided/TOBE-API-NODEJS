@@ -27,7 +27,7 @@ export class Album extends Model<Album,AlbumCreationAttribute>
 
   @ApiProperty({example:'0',description:"ID of album user"})
   @ForeignKey(() => User)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   userId:number
 
   @HasMany(() => Photo, {foreignKey:"albumId",

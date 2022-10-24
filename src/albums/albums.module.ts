@@ -7,6 +7,7 @@ import { User } from "../users/users.model";
 import { Photo } from "../photos/photos.model";
 import { Album } from "./albums.model";
 import { UsersModule } from "../users/users.module";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
   providers: [AlbumsService],
@@ -14,7 +15,9 @@ import { UsersModule } from "../users/users.module";
   imports:
     [
       SequelizeModule.forFeature([Album,User,Photo]),
-      UsersModule
+      forwardRef(() => UsersModule),
+      forwardRef(() => JwtModule)
+
     ],
   exports:
     [

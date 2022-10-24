@@ -28,7 +28,7 @@ export class Photo extends Model<Photo,AlbumCreationAttribute>
 
   @ApiProperty({example:'0',description:"ID of photo album"})
   @ForeignKey(() => Album)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   albumId:number
 
   @HasOne(() => User, "mainPhoto")

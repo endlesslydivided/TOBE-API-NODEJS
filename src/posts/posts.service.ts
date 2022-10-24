@@ -6,6 +6,8 @@ import { Post } from "./posts.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreatePostDto } from "./dto/createPost.dto";
 import { Attachment } from "../attachments/attachments.model";
+import { Transaction } from "sequelize";
+import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class PostsService {
@@ -13,24 +15,30 @@ export class PostsService {
   readonly ATTACHABLE_TYPE = 'post';
 
   constructor(private attachmentService:AttachmentsService,
+              private usersService: UsersService,
               @InjectModel(Post)private postRepository:typeof Post)
 {
   }
 
-  async createPost(dto: CreatePostDto,files: any)
+  async create(dto: CreatePostDto,files: any,transaction:Transaction)
   {
-    const post = await this.postRepository.create(dto);
-    const attachments = this.attachmentService.createAttachment(files,this.ATTACHABLE_TYPE,post.id);
+    this.usersService.getUserById(dto.userId).catch((error) =>
+    {
+      throw new HttpException('Пост не создан: пользователь не найден',HttpStatus.NOT_FOUND);
+    });
+
+    const post = await this.postRepository.create(dto,{transaction});
+
     if(post)
     {
-      const attachments = this.attachmentService.createAttachment(files,this.ATTACHABLE_TYPE,post.id);
-      if(attachments)
+      const attachments = await this.attachmentService.createAttachments(files,this.ATTACHABLE_TYPE,post.id,transaction).catch((error) =>
       {
-        return post;
-      }
-      await this.postRepository.destroy({where:{id: post.id}});
-      throw new HttpException('Пост не создан',HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException('Пост не создан: ошибка добавления прикреплений',HttpStatus.INTERNAL_SERVER_ERROR);
+      })
+
+      return post;
     }
+
     throw new HttpException('Пост не создан',HttpStatus.INTERNAL_SERVER_ERROR);
   }
 

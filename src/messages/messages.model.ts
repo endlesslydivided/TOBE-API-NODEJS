@@ -8,7 +8,7 @@ import { Tag } from "../tags/tags.model";
 interface MessageCreationAttribute
 {
   dialogId:number;
-  userID:number;
+  userId:number;
   text:string;
 }
 
@@ -25,12 +25,12 @@ export class Message extends Model<Message,MessageCreationAttribute>
 
   @ApiProperty({example:'0',description:"ID of message dialog"})
   @ForeignKey(() => Dialog)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   dialogId:number
 
   @ApiProperty({example:'0',description:"ID of message user"})
   @ForeignKey(() => User)
-  @Column({type:DataType.INTEGER})
+  @Column({type:DataType.INTEGER,allowNull:true})
   userId:number
 
   @HasMany(() => Attachment,{foreignKey:"attachableId",scope: { attachableType: "message" },
