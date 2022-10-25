@@ -16,7 +16,7 @@ import { JwtModule } from "@nestjs/jwt";
     [
       SequelizeModule.forFeature([Album,User,Photo]),
       forwardRef(() => UsersModule),
-      forwardRef(() => JwtModule)
+      forwardRef(() => PhotoModule),
 
     ],
   exports:

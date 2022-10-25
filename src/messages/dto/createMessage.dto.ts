@@ -1,5 +1,3 @@
-import { Tag } from "../../tags/tags.model";
-
 export class CreateMessageDto
 {
   readonly text:string;

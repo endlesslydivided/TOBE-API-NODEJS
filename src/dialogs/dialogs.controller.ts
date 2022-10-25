@@ -7,7 +7,7 @@ import {
   Param,
   Post,
   Put,
-  UseGuards,
+  Query,
   UseInterceptors,
   UsePipes
 } from "@nestjs/common";
@@ -20,13 +20,15 @@ import { TransactionInterceptor } from "../interceptors/transaction.interceptor"
 import { Transaction } from "sequelize";
 import { TransactionParam } from "../decorators/transactionParam.decorator";
 import { UpdateDialogDto } from "./dto/updateDialog.dto";
+import { MessagesService } from "../messages/messages.service";
 
 @ApiTags('Dialogs')
 @Controller('dialogs')
 export class DialogsController {
 
   constructor(
-    private dialogsService: DialogsService
+    private dialogsService: DialogsService,
+    private messagesService: MessagesService
   )
   {}
 
@@ -59,5 +61,14 @@ export class DialogsController {
   deleteDialog(@Param('id') id:number)
   {
     return this.dialogsService.delete(id);
+  }
+
+  @UseInterceptors(TransactionInterceptor)
+  @Get("/:id/messages")
+  getPagedMessagesByDialog(@Param('id') dialogId:number,
+                           @Query('limit') limit:number,
+                           @Query('page') page:number)
+  {
+    return this.messagesService.getPagedByDialog(dialogId,limit,page);
   }
 }

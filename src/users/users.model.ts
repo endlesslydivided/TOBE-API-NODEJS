@@ -18,6 +18,7 @@ import { Message } from "../messages/messages.model";
 import { Post } from "../posts/posts.model";
 import { Album } from "../albums/albums.model";
 import { Photo } from "../photos/photos.model";
+import { Friend } from "../friends/friends.model";
 
 interface UserCreationAttribute
 {
@@ -97,7 +98,7 @@ export class User extends Model<User,UserCreationAttribute>
 
   @BelongsTo(() => Photo,{foreignKey:"mainPhoto",
     constraints:true,onDelete:"set null",onUpdate:"cascade"})
-  photo:Dialog[];
+  photo:Photo;
 
   @HasMany(() => Dialog, {foreignKey:"creatorId",
   constraints:true,onDelete:"set null",onUpdate:"cascade"})
@@ -114,6 +115,10 @@ export class User extends Model<User,UserCreationAttribute>
   @HasMany(() => Album, {foreignKey:"userId",
     constraints:true,onDelete:"set null",onUpdate:"cascade"})
   albums: Album[];
+
+  @HasMany(() => Friend, {foreignKey:"userId",
+    constraints:true,onDelete:"set null",onUpdate:"cascade"})
+  friends: Friend[];
 
 
 }

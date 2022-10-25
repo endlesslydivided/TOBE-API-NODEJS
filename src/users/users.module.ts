@@ -7,7 +7,6 @@ import { Role } from "../roles/roles.model";
 import { UserRoles } from "../roles/userRoles.model";
 import { RolesModule } from "../roles/roles.module";
 import { AuthModule } from "../auth/auth.module";
-import { AlbumsService } from "../albums/albums.service";
 import { AlbumsModule } from "../albums/albums.module";
 import { Album } from "../albums/albums.model";
 import { Message } from "../messages/messages.model";

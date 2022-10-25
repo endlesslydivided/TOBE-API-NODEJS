@@ -1,13 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { UsersService } from "../users/users.service";
-import { UpdateAlbumDto } from "../albums/dto/updateAlbum.dto";
 import { Dialog } from "./dialogs.model";
 import { CreateDialogDto } from "./dto/createDialog.dto";
 import { UserDialog } from "./userDialogs.model";
-import { Album } from "../albums/albums.model";
-import { map } from "rxjs";
-import { Transaction, Op } from "sequelize";
+import sequlize, { Transaction,Op } from "sequelize";
 import { UpdateDialogDto } from "./dto/updateDialog.dto";
 import { Message } from "../messages/messages.model";
 
@@ -65,6 +62,35 @@ export class DialogsService {
               });
     }
     throw new HttpException('Диалоги не найдены: пользователь не найден',HttpStatus.NOT_FOUND);
+  }
+
+  async getPagedByUser(userId:number, limit :number = 9,page:number = 0)
+  {
+    this.userService.getUserById(userId).catch((error) =>
+    {
+      throw new HttpException('Диалоги не найдены: пользователь не найден',HttpStatus.NOT_FOUND);
+    });
+
+    const offset = page * limit - limit;
+    return this.dialogRepository.findAndCountAll(
+      {
+        include:
+          [
+            {model:UserDialog,where:{userId},attributes: ['createdAt']},
+            {model:Message,attributes: ['createdAt','text','userId'],where:{
+                createdAt:
+                  {
+                    [Op.eq] : sequlize.fn('max',sequlize.col('createdAt'))
+                  }
+              },}
+          ],
+        limit,offset,
+        order:[['createdAt','DESC']]
+      }).then((result) =>  result)
+      .catch((error)=>
+      {
+        throw new HttpException('Диалоги не найдены',HttpStatus.INTERNAL_SERVER_ERROR);
+      })
   }
 
   async getById(id:number)

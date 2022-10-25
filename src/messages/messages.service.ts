@@ -1,15 +1,9 @@
-import { HttpException, HttpStatus, Injectable, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
-import { Dialog } from "../dialogs/dialogs.model";
-import { UserDialog } from "../dialogs/userDialogs.model";
 import { UsersService } from "../users/users.service";
-import { CreateDialogDto } from "../dialogs/dto/createDialog.dto";
 import { Transaction } from "sequelize";
-import { UpdateDialogDto } from "../dialogs/dto/updateDialog.dto";
 import { CreateMessageDto } from "./dto/createMessage.dto";
 import { DialogsService } from "../dialogs/dialogs.service";
-import { Post } from "../posts/posts.model";
-import { FilesInterceptor } from "@nestjs/platform-express";
 import { AttachmentsService } from "../attachments/attachments.service";
 import { Message } from "./messages.model";
 import { UpdateMessageDto } from "./dto/updateMessage.dto";
@@ -84,6 +78,8 @@ export class MessagesService {
       {
         throw new HttpException('Сообщение не изменено: ошибка изменения тегов. Ошибка на стороне сервера.',HttpStatus.INTERNAL_SERVER_ERROR);
       })
+
+      return message;
     }
     throw new HttpException('Сообщение не изменено. Ошибка на стороне сервера.',HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -98,9 +94,10 @@ export class MessagesService {
     throw new HttpException('Сообщения не найдены: диалог не существует',HttpStatus.NOT_FOUND);
   }
 
-  async getPagedByDialog(dialogId:number,limit:number,offset:number)
+  async getPagedByDialog(dialogId:number,limit :number = 9,page:number = 0)
   {
     const dialog = await this.dialogsService.getById(dialogId);
+    const offset = page * limit - limit;
     if(dialog)
     {
       return await this.messageRepository.findAndCountAll({where:{dialogId},limit,offset,order:[['createdAt','DESC']]});

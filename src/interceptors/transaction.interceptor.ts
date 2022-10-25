@@ -1,8 +1,8 @@
-import {  CallHandler,  ExecutionContext,  Inject,  Injectable,  NestInterceptor,} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
-import { Transaction } from 'sequelize';
-import { Sequelize } from 'sequelize-typescript';
+import { CallHandler, ExecutionContext, Inject, Injectable, NestInterceptor } from "@nestjs/common";
+import { Observable, throwError } from "rxjs";
+import { catchError, tap } from "rxjs/operators";
+import { Transaction } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 
 @Injectable()
 export class TransactionInterceptor implements NestInterceptor

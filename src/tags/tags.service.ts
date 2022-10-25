@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Transaction } from "sequelize";
 import { throwError } from "rxjs";
@@ -24,7 +24,6 @@ export class TagsService {
     const tags = await this.tagsRepository.findAll({where:{taggableId, taggableType},order:[['createdAt','ASC']]});
 
     const existingTagsIds = new Set(tags.map(a => a.id));
-
     const idsValuesToDelete = tagsIds.filter((x) => !existingTagsIds.has(x));
 
     idsValuesToDelete.map((id) =>

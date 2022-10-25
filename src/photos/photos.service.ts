@@ -1,11 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { Album } from "../albums/albums.model";
-import { UsersService } from "../users/users.service";
-import { CreateAlbumDto } from "../albums/dto/createAlbum.dto";
-import { UpdateAlbumDto } from "../albums/dto/updateAlbum.dto";
-import { AlbumsService } from "../albums/albums.service";
-import { Photo } from "./photos.model";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class PhotosService {

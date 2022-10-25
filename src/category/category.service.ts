@@ -39,6 +39,12 @@ export class CategoryService {
     throw new HttpException('Категория не найдена',HttpStatus.NOT_FOUND);
   }
 
+  async getAll()
+  {
+    return await this.categoryRepository.findAll();
+  }
+
+
   async deleteCategory(id:number)
   {
     const category = await this.categoryRepository.findByPk(id);

@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common";
-import { AttachmentsService } from "../attachments/attachments.service";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { Post } from "../posts/posts.model";
 import { CategoryService } from "./category.service";

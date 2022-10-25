@@ -1,7 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsDecimal, IsEmail, IsNumber, IsString, Length } from "class-validator";
-import { Column, DataType, ForeignKey } from "sequelize-typescript";
-import { User } from "../../users/users.model";
+import { IsNumber, IsString, Length } from "class-validator";
 
 export class UpdateAlbumDto
 {

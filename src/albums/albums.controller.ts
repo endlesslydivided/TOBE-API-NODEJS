@@ -1,17 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UseGuards, UsePipes } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, UsePipes } from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { UsersService } from "../users/users.service";
-import { User } from "../users/users.model";
 import { ValidationPipe } from "../pipes/validation.pipe";
-import { CreateUserDto } from "../users/dto/createUser.dto";
-import { RolesGuard } from "../auth/roles.guard";
-import { Roles } from "../auth/roleAuth.decorator";
-import { AddRoleDto } from "../users/dto/addRole.dto";
 import { AlbumsService } from "./albums.service";
 import { Album } from "./albums.model";
 import { CreateAlbumDto } from "./dto/createAlbum.dto";
 import { UpdateAlbumDto } from "./dto/updateAlbum.dto";
-import { JwtAuthGuard } from "../auth/jwtAuth.guard";
 
 @ApiTags('Albums')
 @Controller('albums')
@@ -22,7 +15,7 @@ export class AlbumsController {
   {}
 
   @ApiOperation({summary:"Album creation"})
-  @ApiResponse({status:200,type:Album})
+  @ApiResponse({status:201,type:Album})
   @UsePipes(ValidationPipe)
   @HttpCode(HttpStatus.CREATED)
   @Post()
@@ -40,10 +33,10 @@ export class AlbumsController {
     return this.albumService.updateAlbum(id,albumDto);
   }
 
-  @ApiOperation({summary:"Give user a role"})
-  @ApiResponse({status:200})
-  @UseGuards(RolesGuard)
-  @Roles("ADMIN")
+  @ApiOperation({summary:"Delete album by id"})
+  @ApiResponse({status:204})
+  // @UseGuards(RolesGuard)
+  // @Roles("ADMIN")
   @HttpCode(HttpStatus.NO_CONTENT)
   @Get('/:id')
   deleteAlbum(@Param('id') id:number)
