@@ -7,21 +7,22 @@ import { User } from "../users/users.model";
 import { Photo } from "../photos/photos.model";
 import { Album } from "./albums.model";
 import { UsersModule } from "../users/users.module";
-import { JwtModule } from "@nestjs/jwt";
+import { PhotosModule } from "../photos/photos.module";
 
 @Module({
   providers: [AlbumsService],
   controllers: [AlbumsController],
   imports:
     [
-      SequelizeModule.forFeature([Album,User,Photo]),
+      SequelizeModule.forFeature([Album, User, Photo]),
       forwardRef(() => UsersModule),
-      forwardRef(() => PhotoModule),
+      forwardRef(() => PhotosModule)
 
     ],
   exports:
     [
-      AlbumsService,
+      AlbumsService
     ]
 })
-export class AlbumsModule {}
+export class AlbumsModule {
+}

@@ -1,9 +1,9 @@
 import {
   Body,
   Controller,
+  forwardRef,
   Get,
-  HttpCode,
-  HttpStatus,
+  Inject,
   Param,
   Post,
   Put,
@@ -11,7 +11,7 @@ import {
   UseInterceptors,
   UsePipes
 } from "@nestjs/common";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { ValidationPipe } from "../pipes/validation.pipe";
 import { DialogsService } from "./dialogs.service";
 import { Dialog } from "./dialogs.model";
@@ -22,53 +22,47 @@ import { TransactionParam } from "../decorators/transactionParam.decorator";
 import { UpdateDialogDto } from "./dto/updateDialog.dto";
 import { MessagesService } from "../messages/messages.service";
 
-@ApiTags('Dialogs')
-@Controller('dialogs')
+@ApiTags("Dialogs")
+@Controller("dialogs")
 export class DialogsController {
 
   constructor(
     private dialogsService: DialogsService,
-    private messagesService: MessagesService
-  )
-  {}
+    @Inject(forwardRef(() => MessagesService)) private messagesService: MessagesService
+  ) {
+  }
 
-  @ApiOperation({summary:"Dialog creation"})
-  @ApiResponse({status:200,type:Dialog})
+  @ApiOperation({ summary: "Dialog creation" })
+  @ApiOkResponse({ type: Dialog })
   @UsePipes(ValidationPipe)
   @UseInterceptors(TransactionInterceptor)
-  @HttpCode(HttpStatus.CREATED)
   @Post()
-  createDialog(@Body() dialogDto: CreateDialogDto,@TransactionParam() transaction: Transaction)
-  {
-    return this.dialogsService.create(dialogDto,transaction);
+  createDialog(@Body() dialogDto: CreateDialogDto, @TransactionParam() transaction: Transaction) {
+    return this.dialogsService.createDialog(dialogDto, transaction);
   }
 
-  @ApiOperation({summary:"Update dialog by id"})
-  @ApiResponse({status:200,type:Dialog})
-  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Update dialog by id" })
+  @ApiOkResponse()
   @Put(`/:id`)
-  updateDialog(@Body() dialogDto: UpdateDialogDto,@Param('id') id:number)
-  {
-    return this.dialogsService.update(id,dialogDto);
+  updateDialog(@Body() dialogDto: UpdateDialogDto, @Param("id") id: number) {
+    return this.dialogsService.updateDialog(id, dialogDto);
   }
 
-  @ApiOperation({summary:"Delete a dialog"})
-  @ApiResponse({status:204})
+  @ApiOperation({ summary: "Delete a dialog" })
+  @ApiNoContentResponse()
   // @UseGuards(RolesGuard)
   // @Roles("ADMIN")
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Get('/:id')
-  deleteDialog(@Param('id') id:number)
-  {
-    return this.dialogsService.delete(id);
+  @Get("/:id")
+  deleteDialog(@Param("id") id: number) {
+    return this.dialogsService.deleteDialog(id);
   }
 
-  @UseInterceptors(TransactionInterceptor)
+  @ApiOperation({ summary: "Get paged dialog' messages" })
+  @ApiOkResponse({ type: "{rows:Message[],count:number}" })
   @Get("/:id/messages")
-  getPagedMessagesByDialog(@Param('id') dialogId:number,
-                           @Query('limit') limit:number,
-                           @Query('page') page:number)
-  {
-    return this.messagesService.getPagedByDialog(dialogId,limit,page);
+  getPagedMessageByDialog(@Param("id") dialogId: number,
+                          @Query("limit") limit: number,
+                          @Query("page") page: number) {
+    return this.messagesService.getPagedMessageByDialog(dialogId, limit, page);
   }
 }

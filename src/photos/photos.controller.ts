@@ -1,4 +1,53 @@
-import { Controller } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Put, UploadedFile, UseInterceptors } from "@nestjs/common";
+import { TransactionInterceptor } from "../interceptors/transaction.interceptor";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import { TransactionParam } from "../decorators/transactionParam.decorator";
+import { Transaction } from "sequelize";
+import { PhotosService } from "./photos.service";
+import { CreatePhotoDto } from "./dto/createPhoto.dto";
+import { UpdatePhotoDto } from "./dto/updatePhoto.dto";
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Photo } from "./photos.model";
 
-@Controller('photos')
-export class PhotosController {}
+@ApiTags("Photos")
+@Controller("photos")
+export class PhotosController {
+
+  constructor(private photosService: PhotosService) {
+  }
+
+  @ApiOperation({ summary: "Photo creation" })
+  @ApiCreatedResponse({ type: Photo })
+  @UseInterceptors(TransactionInterceptor, FilesInterceptor("file"))
+  @Post()
+  createPhoto(@Body() dto: CreatePhotoDto,
+              @UploadedFile() file,
+              @TransactionParam() transaction: Transaction
+  ) {
+    return this.photosService.createPhoto(dto, file, transaction);
+  }
+
+  @ApiOperation({ summary: "Photo update" })
+  @ApiOkResponse()
+  @UseInterceptors(TransactionInterceptor)
+  @Put("/:id")
+  updatePhoto(@Param("id") id: number,
+              @Body() dto: UpdatePhotoDto,
+              @TransactionParam() transaction: Transaction) {
+    return this.photosService.updatePhoto(id, dto, transaction);
+  }
+
+  @ApiOperation({ summary: "Photo delete" })
+  @ApiNoContentResponse()
+  @Delete("/:id")
+  deletePhoto(@Param("id") id: number) {
+    return this.photosService.deletePhoto(id);
+  }
+
+  @ApiOperation({ summary: "Get one photo" })
+  @ApiOkResponse({ type: Photo })
+  @Get("/:id")
+  getOne(@Param("id") id: number) {
+    return this.photosService.getById(id);
+  }
+}

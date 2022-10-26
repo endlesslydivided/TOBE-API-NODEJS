@@ -9,22 +9,24 @@ import { Attachment } from "../attachments/attachments.model";
 import { Tag } from "../tags/tags.model";
 import { UsersModule } from "../users/users.module";
 import { DialogsModule } from "../dialogs/dialogs.module";
-import { AttachmentsService } from "../attachments/attachments.service";
-import { TagsService } from "../tags/tags.service";
+import { AttachmentsModule } from "../attachments/attachments.module";
+import { TagsModule } from "../tags/tags.module";
 
 @Module({
   providers: [MessagesService],
   controllers: [MessagesController],
   imports:
     [
-      SequelizeModule.forFeature([Message,Dialog,Attachment,Tag,User]),
+      SequelizeModule.forFeature([Message, Dialog, Attachment, Tag, User]),
       forwardRef(() => UsersModule),
       forwardRef(() => DialogsModule),
-      forwardRef(() => AttachmentsService),
-      forwardRef(() => TagsService)
+      forwardRef(() => AttachmentsModule),
+      forwardRef(() => TagsModule)
     ],
   exports:
     [
-      MessagesService,
-    ]})
-export class MessagesModule {}
+      MessagesService
+    ]
+})
+export class MessagesModule {
+}

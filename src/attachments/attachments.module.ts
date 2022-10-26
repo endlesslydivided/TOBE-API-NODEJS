@@ -6,19 +6,23 @@ import { Message } from "../messages/messages.model";
 import { Post } from "../posts/posts.model";
 import { FilesModule } from "../files/files.module";
 import { DialogsModule } from "../dialogs/dialogs.module";
+import { PostsModule } from "../posts/posts.module";
 
 @Module({
   controllers: [],
   providers: [AttachmentsService],
   imports:
     [
-      SequelizeModule.forFeature([Message,Post,Attachment]),
-      forwardRef(()=> FilesModule),
-      forwardRef(()=> DialogsModule)
+      SequelizeModule.forFeature([Message, Post, Attachment]),
+      forwardRef(() => FilesModule),
+      forwardRef(() => DialogsModule),
+      forwardRef(() => PostsModule)
+
     ],
   exports:
     [
-      AttachmentsService,
+      AttachmentsService
     ]
 })
-export class AttachmentsModule {}
+export class AttachmentsModule {
+}

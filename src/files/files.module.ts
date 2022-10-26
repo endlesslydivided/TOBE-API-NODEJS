@@ -4,8 +4,9 @@ import { FilesService } from "./files.service";
 @Module({
   providers: [FilesService],
   exports:
-  [
-    FilesService
-  ]
+    [
+      FilesService
+    ]
 })
-export class FilesModule {}
+export class FilesModule {
+}

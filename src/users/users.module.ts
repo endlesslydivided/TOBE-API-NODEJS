@@ -13,20 +13,30 @@ import { Message } from "../messages/messages.model";
 import { Photo } from "../photos/photos.model";
 import { Dialog } from "../dialogs/dialogs.model";
 import { Post } from "../posts/posts.model";
+import { PhotosModule } from "../photos/photos.module";
+import { DialogsModule } from "../dialogs/dialogs.module";
+import { PostsModule } from "../posts/posts.module";
+import { FriendsModule } from "../friends/friends.module";
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
   imports:
     [
-      SequelizeModule.forFeature([User,Role,UserRoles,Album,Message,Photo,Dialog,Post]),
+      SequelizeModule.forFeature([User, Role, UserRoles, Album, Message, Photo, Dialog, Post]),
       forwardRef(() => RolesModule),
       forwardRef(() => AlbumsModule),
-      forwardRef(() => AuthModule)
+      forwardRef(() => AuthModule),
+      forwardRef(() => PhotosModule),
+      forwardRef(() => DialogsModule),
+      forwardRef(() => FriendsModule),
+      forwardRef(() => PostsModule)
+
     ],
   exports:
-  [
-    UsersService,
-  ]
+    [
+      UsersService
+    ]
 })
-export class UsersModule {}
+export class UsersModule {
+}

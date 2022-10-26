@@ -11,11 +11,12 @@ import { Photo } from "../photos/photos.model";
   controllers: [],
   imports:
     [
-      SequelizeModule.forFeature([Post,Message,Photo,Tag])
+      SequelizeModule.forFeature([Post, Message, Photo, Tag])
     ],
   exports:
     [
-      TagsService,
+      TagsService
     ]
 })
-export class TagsModule {}
+export class TagsModule {
+}

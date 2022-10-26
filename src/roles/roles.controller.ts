@@ -4,27 +4,25 @@ import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Role } from "./roles.model";
 import { RolesService } from "./roles.service";
 
-@ApiTags('Roles')
-@Controller('roles')
+@ApiTags("Roles")
+@Controller("roles")
 export class RolesController {
   constructor(
     private roleService: RolesService
-  )
-  {}
+  ) {
+  }
 
-  @ApiOperation({summary:"Role creation"})
-  @ApiResponse({status:200,type:Role})
+  @ApiOperation({ summary: "Role creation" })
+  @ApiResponse({ status: 200, type: Role })
   @Post()
-  create(@Body() roleDto: CreateRoleDto)
-  {
+  create(@Body() roleDto: CreateRoleDto) {
     return this.roleService.createRole(roleDto);
   }
 
-  @ApiOperation({summary:"Get all roles"})
-  @ApiResponse({status:200,type:[Role]})
+  @ApiOperation({ summary: "Get all roles" })
+  @ApiResponse({ status: 200, type: [Role] })
   @Get(`/:name`)
-  getAll(@Param('name') name:string)
-  {
+  getAll(@Param("name") name: string) {
     return this.roleService.getRoleByName(name);
   }
 }

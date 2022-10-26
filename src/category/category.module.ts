@@ -9,11 +9,12 @@ import { Category } from "./category.model";
   providers: [CategoryService],
   imports:
     [
-      SequelizeModule.forFeature([Category,Post])
+      SequelizeModule.forFeature([Category, Post])
     ],
   exports:
     [
-      CategoryService,
+      CategoryService
     ]
 })
-export class CategoryModule {}
+export class CategoryModule {
+}

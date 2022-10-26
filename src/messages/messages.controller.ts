@@ -6,37 +6,40 @@ import { TransactionInterceptor } from "../interceptors/transaction.interceptor"
 import { TransactionParam } from "../decorators/transactionParam.decorator";
 import { Transaction } from "sequelize";
 import { UpdateMessageDto } from "./dto/updateMessage.dto";
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Message } from "./messages.model";
 
-@Controller('messages')
+@ApiTags("Messages")
+@Controller("messages")
 export class MessagesController {
 
-  constructor(private messagesService:MessagesService) {
+  constructor(private messagesService: MessagesService) {
   }
 
 
-  @UseInterceptors(FilesInterceptor('files'))
+  @ApiOperation({ summary: "Message creation" })
+  @ApiCreatedResponse({ type: Message })
+  @UseInterceptors(FilesInterceptor("files"))
   @UseInterceptors(TransactionInterceptor)
   @Post()
-  createMessage(@Body() dto: CreateMessageDto,@UploadedFiles() files,@TransactionParam() transaction: Transaction)
-  {
-    return this.messagesService.create(dto, transaction, files);
+  createMessage(@Body() dto: CreateMessageDto, @UploadedFiles() files, @TransactionParam() transaction: Transaction) {
+    return this.messagesService.createMessage(dto, transaction, files);
   }
 
-
-  @UseInterceptors(FilesInterceptor('files'))
+  @ApiOperation({ summary: "Message update" })
+  @ApiOkResponse()
+  @UseInterceptors(FilesInterceptor("files"))
   @UseInterceptors(TransactionInterceptor)
   @Put("/:id")
-  updateMessage(@Param('id') messageId:number, @Body() dto: UpdateMessageDto,@UploadedFiles() files,@TransactionParam() transaction: Transaction)
-  {
-      return this.messagesService.update(messageId,dto,transaction,files);
+  updateMessage(@Param("id") messageId: number, @Body() dto: UpdateMessageDto, @UploadedFiles() files, @TransactionParam() transaction: Transaction) {
+    return this.messagesService.updateMessage(messageId, dto, transaction, files);
   }
 
-  @UseInterceptors(FilesInterceptor('files'))
-  @UseInterceptors(TransactionInterceptor)
+  @ApiOperation({ summary: "Message delete" })
+  @ApiNoContentResponse()
   @Delete("/:id")
-  deleteMessage(@Param('id') messageId:number)
-  {
-    return this.messagesService.delete(messageId);
+  deleteMessage(@Param("id") messageId: number) {
+    return this.messagesService.deleteMessage(messageId);
   }
 
 

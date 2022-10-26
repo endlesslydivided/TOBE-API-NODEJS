@@ -7,18 +7,19 @@ import { UsersModule } from "../users/users.module";
 @Module({
   controllers: [AuthController],
   providers: [AuthService],
-  imports:[
+  imports: [
     forwardRef(() => UsersModule),
     JwtModule.register({
-      secret: process.env.PRIVATE_KEY || 'SECRET_ToBe',
-      signOptions:{
-        expiresIn: '24h'
+      secret: process.env.PRIVATE_KEY || "SECRET_ToBe",
+      signOptions: {
+        expiresIn: "24h"
       }
     })
   ],
-  exports:[
+  exports: [
     AuthService,
     JwtModule
   ]
 })
-export class AuthModule {}
+export class AuthModule {
+}

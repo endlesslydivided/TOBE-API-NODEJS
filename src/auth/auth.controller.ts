@@ -3,22 +3,20 @@ import { ApiTags } from "@nestjs/swagger";
 import { CreateUserDto } from "../users/dto/createUser.dto";
 import { AuthService } from "./auth.service";
 
-@ApiTags('Authorization')
-@Controller('auth')
+@ApiTags("Authorization")
+@Controller("auth")
 export class AuthController {
 
   constructor(private authService: AuthService) {
   }
 
-  @Post('/login')
-  login(@Body()userDto:CreateUserDto)
-  {
+  @Post("/login")
+  login(@Body() userDto: CreateUserDto) {
     return this.authService.login(userDto);
   }
 
-  @Post('/registration')
-  registration(@Body()userDto:CreateUserDto)
-  {
+  @Post("/registration")
+  registration(@Body() userDto: CreateUserDto) {
     return this.authService.registration(userDto);
   }
 }

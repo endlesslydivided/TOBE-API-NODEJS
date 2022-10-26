@@ -12,41 +12,35 @@ import { Reflector } from "@nestjs/core";
 import { ROLES_KEY } from "./roleAuth.decorator";
 
 @Injectable()
-export class RolesGuard implements CanActivate
-{
-  constructor(private jwtService:JwtService,
+export class RolesGuard implements CanActivate {
+  constructor(private jwtService: JwtService,
               private reflector: Reflector) {
   }
-  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean>
-  {
-    try
-    {
-      const requiredRoles= this.reflector.getAllAndOverride<string>(ROLES_KEY,[
+
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    try {
+      const requiredRoles = this.reflector.getAllAndOverride<string>(ROLES_KEY, [
         context.getHandler(),
         context.getClass()
       ]);
 
-      if(!requiredRoles)
-      {
+      if (!requiredRoles) {
         return true;
       }
       const request = context.switchToHttp().getRequest();
 
       const authHeader = request.headers.authorization;
-      const [token,bearer] = authHeader.split(' ');
+      const [token, bearer] = authHeader.split(" ");
 
-      if(bearer !== 'Bearer' || !token)
-      {
-        throw new UnauthorizedException({message:'Пользователь не авторизован'})
+      if (bearer !== "Bearer" || !token) {
+        throw new UnauthorizedException({ message: "Пользователь не авторизован" });
       }
 
       const user = this.jwtService.verify(token);
       request.user = user;
-      return  user.roles.some(role => requiredRoles.includes(role.value));
-    }
-    catch (e)
-    {
-      throw new HttpException('Пользователь не имеет доступа',HttpStatus.FORBIDDEN);
+      return user.roles.some(role => requiredRoles.includes(role.value));
+    } catch (e) {
+      throw new HttpException("Пользователь не имеет доступа", HttpStatus.FORBIDDEN);
     }
   }
 

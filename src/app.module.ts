@@ -26,43 +26,43 @@ import { TagsModule } from "./tags/tags.module";
 import { Tag } from "./tags/tags.model";
 import { FilesModule } from "./files/files.module";
 import { FriendsModule } from "./friends/friends.module";
+import { Friend } from "./friends/friends.model";
 
-@Module(    {
-  controllers: [],
-  providers: [],
-  imports:[
-    ConfigModule.forRoot({
-      envFilePath: `.${process.env.NODE_ENV}.env`
-    }),
-    SequelizeModule.forRoot({
-      logging: false,
-      dialect:'postgres',
-      host:process.env.POSTGRES_HOST,
-      port: Number(process.env.POSTGRES_PORT),
-      username:process.env.POSTGRES_USER,
-      password:process.env.POSTGRES_PASSWORD,
-      database:process.env.POSTGRES_DB,
-      models:[User,Role,UserRoles,Dialog,UserDialog,Message,Post,Attachment,Category,Album,Photo,Tag],
-      autoLoadModels: true,
-      synchronize:true
-    }),
-    UsersModule,
-    RolesModule,
-    AuthModule,
-    PostsModule,
-    AttachmentsModule,
-    DialogsModule,
-    MessagesModule,
-    AlbumsModule,
-    PhotosModule,
-    CategoryModule,
-    TagsModule,
-    FilesModule,
-    FriendsModule
-  ]
-}
+@Module({
+    controllers: [],
+    providers: [],
+    imports: [
+      ConfigModule.forRoot({
+        envFilePath: `.${process.env.NODE_ENV}.env`
+      }),
+      SequelizeModule.forRoot({
+        logging: false,
+        dialect: "postgres",
+        host: process.env.POSTGRES_HOST,
+        port: Number(process.env.POSTGRES_PORT),
+        username: process.env.POSTGRES_USER,
+        password: process.env.POSTGRES_PASSWORD,
+        database: process.env.POSTGRES_DB,
+        models: [User, Role, UserRoles, Dialog, UserDialog, Message, Post, Attachment, Category, Album, Photo, Tag, Friend],
+        autoLoadModels: true,
+        synchronize: true
+      }),
+      UsersModule,
+      RolesModule,
+      AuthModule,
+      PostsModule,
+      AttachmentsModule,
+      DialogsModule,
+      MessagesModule,
+      AlbumsModule,
+      PhotosModule,
+      CategoryModule,
+      TagsModule,
+      FilesModule,
+      FriendsModule
+    ]
+  }
 )
-export class AppModule
-{
+export class AppModule {
 
 }

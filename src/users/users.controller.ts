@@ -1,58 +1,140 @@
-import { Body, Controller, Get, Post, UseGuards, UsePipes } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  forwardRef,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Query,
+  UseGuards,
+  UseInterceptors,
+  UsePipes
+} from "@nestjs/common";
 import { CreateUserDto } from "./dto/createUser.dto";
 import { UsersService } from "./users.service";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { User } from "./users.model";
 import { Roles } from "../auth/roleAuth.decorator";
 import { RolesGuard } from "../auth/roles.guard";
 import { AddRoleDto } from "./dto/addRole.dto";
 import { ValidationPipe } from "../pipes/validation.pipe";
+import { PostsService } from "../posts/posts.service";
+import { PhotosService } from "../photos/photos.service";
+import { AlbumsService } from "../albums/albums.service";
+import { FriendsService } from "../friends/friends.service";
+import { DialogsService } from "../dialogs/dialogs.service";
+import { TransactionInterceptor } from "../interceptors/transaction.interceptor";
+import { TransactionParam } from "../decorators/transactionParam.decorator";
+import { Transaction } from "sequelize";
 
-@ApiTags('Users')
-@Controller('users')
+@ApiTags("Users")
+@Controller("users")
 export class UsersController {
 
   constructor(
-    private userService: UsersService
-  )
-  {}
+    @Inject(forwardRef(() => UsersService)) private userService: UsersService,
+    @Inject(forwardRef(() => PostsService)) private postsService: PostsService,
+    @Inject(forwardRef(() => PhotosService)) private photosService: PhotosService,
+    @Inject(forwardRef(() => AlbumsService)) private albumsService: AlbumsService,
+    @Inject(forwardRef(() => DialogsService)) private dialogsService: DialogsService,
+    @Inject(forwardRef(() => FriendsService)) private friendsService: FriendsService
+  ) {
+  }
 
-  @ApiOperation({summary:"User creation"})
-  @ApiResponse({status:200,type:User})
+  @ApiOperation({ summary: "User creation" })
+  @ApiCreatedResponse({ type: User })
   @UsePipes(ValidationPipe)
   @Post()
-  create(@Body() userDto: CreateUserDto)
-  {
+  create(@Body() userDto: CreateUserDto) {
     return this.userService.createUser(userDto);
   }
 
-  @ApiOperation({summary:"Get all users"})
-  @ApiResponse({status:200,type:[User]})
-  @UseGuards(RolesGuard)
-  // @Roles("ADMIN")
+  @ApiOperation({ summary: "Get paged users" })
+  @ApiOkResponse({ type: "{rows:User[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
   @Get()
-  getAll()
-  {
-    return this.userService.getAllUser();
+  getPagedUsers(@Query("page") page: number,
+                @Query("limit") limit: number) {
+    return this.userService.getPagedUsers(limit, page);
   }
 
-  // @ApiOperation({summary:"Delete album by userId"})
-  // @ApiResponse({status:204,type:[User]})
-  // @UseGuards(RolesGuard)
-  // // @Roles("ADMIN")
-  // @Delete('/:userId/albums/:albumId')
-  // deleteAlbumByUser(@Param('userId') userId: number,@Param('albumId') albumId)
-  // {
-  //   return this.albumService.deleteById();
-  // }
 
-  @ApiOperation({summary:"Give user a role"})
-  @ApiResponse({status:200})
+  @ApiOperation({ summary: "Get paged user's friends" })
+  @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
+  @Get("/:id/friends")
+  getPagedFriendsByUser(@Param("id") id: number,
+                        @Query("page") page: number,
+                        @Query("limit") limit: number) {
+    return this.friendsService.getPagedFriendsByUser(id, limit, page);
+  }
+
+  @ApiOperation({ summary: "Get paged user's albums" })
+  @ApiOkResponse()
+  // @UseGuards(RolesGuard)
+  // @Roles("ADMIN")
+  @Get("/:id/albums")
+  getPagedAlbumsByUser(@Param("id") id: number,
+                       @Query("page") page: number,
+                       @Query("limit") limit: number) {
+    return this.albumsService.getPagedAlbumsByUser(id, limit, page);
+  }
+
+  @ApiOperation({ summary: "Get paged user's posts" })
+  @ApiOkResponse({ type: "{rows:Post[],count:number}" })
+  //@UseGuards(RolesGuard)
+  //@Roles("USER")
+  @Get("/:id/posts")
+  getPagedPostsByUser(@Param("id") id: number,
+                      @Query("page") page: number,
+                      @Query("limit") limit: number) {
+    return this.postsService.getPagedPostByUser(id, limit, page);
+  }
+
+  @ApiOperation({ summary: "Get paged user's posts" })
+  @ApiOkResponse({ type: "{rows:Post[],count:number}" })
+  //@UseGuards(RolesGuard)
+  //@Roles("USER")
+  @Get("/:id/dialogs")
+  getPagedDialogsByUser(@Param("id") id: number,
+                        @Query("page") page: number,
+                        @Query("limit") limit: number) {
+    return this.dialogsService.getPagedDialogsByUser(id, limit, page);
+  }
+
+  @ApiOperation({ summary: "Get paged user's subscriptions posts" })
+  @ApiOkResponse({ type: "{rows:Post[],count:number}" })
+  //@UseGuards(RolesGuard)
+  //@Roles("USER")
+  @Get("/:id/feed")
+  getPagedSubsByUser(@Param("id") id: number,
+                     @Query("page") page: number,
+                     @Query("limit") limit: number) {
+    return this.postsService.getPagedPostByUserSubscriptions(id, limit, page);
+  }
+
+
+  @ApiOperation({ summary: "Give user a role" })
+  @ApiCreatedResponse()
   @UseGuards(RolesGuard)
   @Roles("ADMIN")
-  @Get('/role')
-  addRole(@Body() dto: AddRoleDto)
-  {
+  @Post("/role")
+  addRole(@Body() dto: AddRoleDto) {
     return this.userService.addRole(dto);
+  }
+
+  @ApiOperation({ summary: "Delete friend" })
+  @ApiNoContentResponse()
+  @UseInterceptors(TransactionInterceptor)
+  @Delete("/:userId/friends/:id")
+  deleteFriend(@Param("userId") userId: number,
+               @Param("id") id: number,
+               @TransactionParam() transaction: Transaction
+  ) {
+    return this.friendsService.deleteFriend(userId, id, transaction);
   }
 }
