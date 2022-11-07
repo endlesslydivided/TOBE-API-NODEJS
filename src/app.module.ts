@@ -27,6 +27,7 @@ import { Tag } from "./tags/tags.model";
 import { FilesModule } from "./files/files.module";
 import { FriendsModule } from "./friends/friends.module";
 import { Friend } from "./friends/friends.model";
+import { MailModule } from './mail/mail.module';
 
 @Module({
     controllers: [],
@@ -45,7 +46,8 @@ import { Friend } from "./friends/friends.model";
         database: process.env.POSTGRES_DB,
         models: [User, Role, UserRoles, Dialog, UserDialog, Message, Post, Attachment, Category, Album, Photo, Tag, Friend],
         autoLoadModels: true,
-        synchronize: true
+        synchronize: true,
+        
       }),
       UsersModule,
       RolesModule,
@@ -59,10 +61,11 @@ import { Friend } from "./friends/friends.model";
       CategoryModule,
       TagsModule,
       FilesModule,
-      FriendsModule
+      FriendsModule,
+      MailModule
     ]
   }
 )
 export class AppModule {
-
+  
 }

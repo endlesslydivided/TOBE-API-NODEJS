@@ -88,6 +88,10 @@ export class User extends Model<User, UserCreationAttribute> {
   @Column({ type: DataType.INTEGER })
   mainPhoto: number;
 
+  @ApiProperty({ example: "0", description: "12345" })
+  @Column({ type: DataType.STRING, unique: true, allowNull: true })
+  refreshToken: string;
+
   @BelongsToMany(() => Role, () => UserRoles)
   roles: Role[];
 

@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  Req,
   UseGuards,
   UseInterceptors,
   UsePipes
@@ -16,8 +17,8 @@ import { CreateUserDto } from "./dto/createUser.dto";
 import { UsersService } from "./users.service";
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { User } from "./users.model";
-import { Roles } from "../auth/roleAuth.decorator";
-import { RolesGuard } from "../auth/roles.guard";
+import { Roles } from "../auth/guards/roleAuth.decorator";
+import { RolesGuard } from "../auth/guards/roles.guard";
 import { AddRoleDto } from "./dto/addRole.dto";
 import { ValidationPipe } from "../pipes/validation.pipe";
 import { PostsService } from "../posts/posts.service";
@@ -28,6 +29,8 @@ import { DialogsService } from "../dialogs/dialogs.service";
 import { TransactionInterceptor } from "../interceptors/transaction.interceptor";
 import { TransactionParam } from "../decorators/transactionParam.decorator";
 import { Transaction } from "sequelize";
+import { Request } from "express";
+import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 
 @ApiTags("Users")
 @Controller("users")
@@ -49,6 +52,15 @@ export class UsersController {
   @Post()
   create(@Body() userDto: CreateUserDto) {
     return this.userService.createUser(userDto);
+  }
+
+  @ApiOperation({ summary: "Get me" })
+  @ApiCreatedResponse({ type: User })
+  @UseGuards(AccessTokenGuard)
+  @UsePipes(ValidationPipe)
+  @Get("/me")
+  getMe(@Req() request: Request) {
+    return this.userService.getUserById(request['user']['id']);
   }
 
   @ApiOperation({ summary: "Get paged users" })

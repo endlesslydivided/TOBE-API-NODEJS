@@ -3,22 +3,21 @@ import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtModule } from "@nestjs/jwt";
 import { UsersModule } from "../users/users.module";
+import { AccessTokenStrategy } from "./strategy/accessToken.strategy";
+import { RefreshTokenStrategy } from "./strategy/refreshToken.strategy";
+import { MailModule } from "src/mail/mail.module";
 
 @Module({
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService,
+    AccessTokenStrategy,
+    RefreshTokenStrategy],
   imports: [
     forwardRef(() => UsersModule),
-    JwtModule.register({
-      secret: process.env.PRIVATE_KEY || "SECRET_ToBe",
-      signOptions: {
-        expiresIn: "24h"
-      }
-    })
+    JwtModule.register({})
   ],
   exports: [
-    AuthService,
-    JwtModule
+    AuthService
   ]
 })
 export class AuthModule {

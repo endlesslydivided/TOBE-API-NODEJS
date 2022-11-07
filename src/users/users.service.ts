@@ -4,6 +4,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { CreateUserDto } from "./dto/createUser.dto";
 import { RolesService } from "../roles/roles.service";
 import { AddRoleDto } from "./dto/addRole.dto";
+import { UpdateUserDto } from "./dto/updateUser.dto";
 
 @Injectable()
 export class UsersService {
@@ -12,7 +13,8 @@ export class UsersService {
     private roleService: RolesService) {
   }
 
-  async createUser(dto: CreateUserDto) {
+  async createUser(dto: CreateUserDto) 
+  {
     const user = await this.userRepository.create(dto);
     const role = await this.roleService.getRoleByName("USER");
     await user.$set("roles", [role.id]);
@@ -20,7 +22,8 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers() {
+  async getAllUsers() 
+  {
     return await this.userRepository.findAll({
       include:
         {
@@ -50,6 +53,15 @@ export class UsersService {
       return dto;
     }
     throw new HttpException("Пользователь или роль не найдены", HttpStatus.NOT_FOUND);
+  }
 
+  async updateUserById( id, dto: UpdateUserDto) 
+  {
+    return await (await this.userRepository.findByPk(id)).update(dto);
+  }
+
+  async updateRefreshTokenById(id, refreshToken) 
+  {
+    return await (await this.userRepository.findByPk(id)).update({refreshToken});
   }
 }
