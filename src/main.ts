@@ -8,7 +8,13 @@ import { Role } from "./roles/roles.model";
 async function start() {
   const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
-  app.enableCors();
+  app.enableCors({
+    origin:  true,
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  });
   const config = new DocumentBuilder()
     .setTitle("ToBe API")
     .setDescription(`

@@ -12,12 +12,12 @@ import { MailerModule } from '@nestjs-modules/mailer';
         host: 'smtp.gmail.com',
         secure: false,
         auth: {
-          user: 'rfrfirf2002@gmail.com',
-          pass: 'WhyCantICry2020#',
+          user: 'tobesocialweb@gmail.com',
+          pass: 'ijjjplrgapayfdyp',
         },
       },
       defaults: {
-        from: '"No Reply" <noreply@example.com>',
+        from: '"No Reply" tobesocialweb@gmail.com',
       },
     
     }),

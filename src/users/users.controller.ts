@@ -59,7 +59,8 @@ export class UsersController {
   @UseGuards(AccessTokenGuard)
   @UsePipes(ValidationPipe)
   @Get("/me")
-  getMe(@Req() request: Request) {
+  getMe(@Req() request: Request) 
+  {
     return this.userService.getUserById(request['user']['id']);
   }
 

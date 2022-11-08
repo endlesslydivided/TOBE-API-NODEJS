@@ -17,7 +17,7 @@ export class AuthService {
 
   async login(authDto: AuthDto) 
   {
-    const user = this.validateUser(authDto);
+    const user = await this.validateUser(authDto);
     const tokens = await this.getTokens(user);
 
     await this.updateRefreshToken(user, tokens.refreshToken);
@@ -31,11 +31,16 @@ export class AuthService {
 
   async confirmEmail(emailToken: string) 
   {
-    const mailData = await this.jwtService.verify(emailToken,{publicKey: process.env.EMAIL_PUBLIC});
+    const mailData = await this.jwtService.verifyAsync(emailToken,{algorithms:['RS256'] ,publicKey: process.env.EMAIL_PUBLIC});
     const user = await this.userService.getUserByEmail(mailData.email);
+    if(user.emailConfirmed)
+    {
+      return false;
+    }
     if(user)
     {
-        return user.update({emailConfirmed:true});
+      user.update({emailConfirmed:true});
+      return true;
     }
     throw new HttpException("Почта не подтвреждена!", HttpStatus.BAD_REQUEST);
   }
@@ -52,7 +57,7 @@ export class AuthService {
     const user = await this.userService.createUser({ ...userDto, salt: salt });
 
     const tokens = await this.getTokens(user);
-    const emailToken = await this.jwtService.signAsync({email: user.email},{privateKey: process.env.EMAIL_PRIVATE});
+    const emailToken = await this.jwtService.signAsync({email: user.email},{algorithm:'RS256', privateKey: process.env.EMAIL_PRIVATE});
     await this.updateRefreshToken(user, tokens.refreshToken);
     await this.mailService.sendUserConfirmation(user,emailToken);
 
@@ -96,6 +101,7 @@ export class AuthService {
           email: user.email,
         },
         {
+          algorithm:'RS256',
           privateKey:process.env.ACCESS_TOKEN_PRIVATE,
           expiresIn: '60m',
         },
@@ -106,6 +112,7 @@ export class AuthService {
           email: user.email,
         },
         {
+          algorithm:'RS256',
           expiresIn: '7d',
           privateKey: process.env.REFRESH_TOKEN_PRIVATE
         },
@@ -120,7 +127,7 @@ export class AuthService {
     const user = await this.userService.getUserByEmail(authDto.email);
     const passwordHash = await bcrypt.hash(authDto.password, user.salt);
 
-    const passwordEquals = await bcrypt.compare(passwordHash, user.password);
+    const passwordEquals = (user.password === passwordHash);
 
     if (user && passwordEquals) {
       return user;
