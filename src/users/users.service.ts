@@ -5,6 +5,8 @@ import { CreateUserDto } from "./dto/createUser.dto";
 import { RolesService } from "../roles/roles.service";
 import { AddRoleDto } from "./dto/addRole.dto";
 import { UpdateUserDto } from "./dto/updateUser.dto";
+import { Album } from "src/albums/albums.model";
+import { Role } from "src/roles/roles.model";
 
 @Injectable()
 export class UsersService {
@@ -33,11 +35,26 @@ export class UsersService {
   }
 
   async getUserByEmail(email: string) {
-    return await this.userRepository.findOne({ where: { email }, include: { all: true } });
+    return await this.userRepository.findOne({ where: { email }, include: [
+      Album, 
+      {
+        model: Role,
+        attributes: ['name']  
+      }
+    ]
+  });
   }
 
   async getUserById(id: number) {
-    return await this.userRepository.findByPk(id);
+    return await this.userRepository.findByPk(id, {include: [
+      Album, 
+      {
+        model: Role,
+        attributes: ['name']  
+      }
+    ],
+    attributes:['id','firstName','lastName','username','email','emailConfirmed','phoneNumber','mainPhoto','refreshToken']
+  });
   }
 
   async getPagedUsers(limit: number = 9, page: number = 0) {

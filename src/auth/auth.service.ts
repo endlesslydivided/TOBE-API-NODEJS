@@ -21,7 +21,7 @@ export class AuthService {
     const tokens = await this.getTokens(user);
 
     await this.updateRefreshToken(user, tokens.refreshToken);
-    return tokens;
+    return {user,...tokens};
   }
 
   async logout(userId: number) 
@@ -32,16 +32,20 @@ export class AuthService {
   async confirmEmail(emailToken: string) 
   {
     const mailData = await this.jwtService.verifyAsync(emailToken,{algorithms:['RS256'] ,publicKey: process.env.EMAIL_PUBLIC});
-    const user = await this.userService.getUserByEmail(mailData.email);
-    if(user.emailConfirmed)
+    if(mailData)
     {
-      return false;
+      const user = await this.userService.getUserByEmail(mailData.email);
+      if(user.emailConfirmed)
+      {
+        return false;
+      }
+      if(user)
+      {
+        user.update({emailConfirmed:true});
+        return true;
+      }
     }
-    if(user)
-    {
-      user.update({emailConfirmed:true});
-      return true;
-    }
+   
     throw new HttpException("Почта не подтвреждена!", HttpStatus.BAD_REQUEST);
   }
 
@@ -64,22 +68,8 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshTokens(userId: number, refreshToken: string) {
-    const user = await this.userService.getUserById(userId);
-    if (!user || !user.refreshToken)
-    {
-      throw new ForbiddenException('Нет доступа!');
-    }
-
-    const tokenHash = await bcrypt.hash(refreshToken, user.salt);
-
-    const refreshTokenMatches = await bcrypt.compare(user.refreshToken, tokenHash);
-
-    if (!refreshTokenMatches) 
-    {
-      throw new ForbiddenException('Нет доступа!');
-    }
-
+  async refreshTokens(user) {
+   
     const tokens = await this.getTokens(user);
 
     await this.updateRefreshToken(user.id, tokens.refreshToken);
@@ -118,20 +108,25 @@ export class AuthService {
         },
       ),
     ]);
-    return {accessToken,refreshToken,};
+    return {accessToken,refreshToken};
   }
 
   
 
   private async validateUser(authDto: AuthDto) {
     const user = await this.userService.getUserByEmail(authDto.email);
-    const passwordHash = await bcrypt.hash(authDto.password, user.salt);
+    if(user)
+    {
+      const passwordHash = await bcrypt.hash(authDto.password, user.salt);
 
-    const passwordEquals = (user.password === passwordHash);
-
-    if (user && passwordEquals) {
-      return user;
+      const passwordEquals = (user.password === passwordHash);
+  
+      if (passwordEquals) 
+      {
+        return user;
+      }
     }
+ 
     throw new UnauthorizedException({ message: "Неккоректные email или пароль" });
   }
 }

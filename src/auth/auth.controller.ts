@@ -15,21 +15,32 @@ export class AuthController {
   }
 
   @Post("/login")
-  login(@Body() authDto: AuthDto,@Res() res: Response) {
-    res.cookie("logged_in",true,{maxAge: 3600,});
-    res.status(200).json(this.authService.login(authDto));
+  async login(@Body() authDto: AuthDto,@Res() response: Response) 
+  {
+    const body = await this.authService.login(authDto);
+    const nowAccessDate = new Date(Date.now());
+    const nowrefresDate = new Date(Date.now());
+
+    nowAccessDate.setMinutes(new Date(Date.now()).getMinutes() + 60);
+    nowrefresDate.setMinutes(new Date(Date.now()).getMinutes() + 10080);
+
+    response.cookie("accessToken",body.accessToken,{maxAge: nowAccessDate.getTime() -  Date.now()});
+    response.cookie("refreshToken",body.refreshToken,{maxAge: nowrefresDate.getTime() -  Date.now(),});
+
+    response.json({user: body.user});
   }
 
   @Post('/registration')
-  registration(@Body() createUserDto: CreateUserDto) {
+  registration(@Body() createUserDto: CreateUserDto) 
+  {
     return this.authService.registration(createUserDto);
   }
 
-  @UseGuards(AccessTokenGuard)
   @Get('/logout')
-  logout(@Req() req: Request,@Res() res: Response) {
-    res.cookie("logged_in",true,{maxAge: 0});
-
+  logout(@Req() req: Request,@Res() response: Response) 
+  {
+    response.cookie("accessToken",{expires: 0});
+    response.cookie("refreshToken",{maxAge: 0});
     return this.authService.logout(req['user']['id']);
   }
 
@@ -46,9 +57,8 @@ export class AuthController {
 
   @UseGuards(RefreshTokenGuard)
   @Get('/refresh')
-  refreshTokens(@Req() req: Request) {
-  const userId = req['user']['id'];
-  const refreshToken = req['user']['refreshToken'];
-  return this.authService.refreshTokens(userId, refreshToken);
-}
+  refreshTokens(@Req() req: Request) 
+  {
+  return this.authService.refreshTokens(req['user']);
+  }
 }
