@@ -10,7 +10,7 @@ export class ValidationPipe implements PipeTransform<any> {
 
     if (!value || metadata.type === 'query' || metadata.type === 'custom'||value instanceof Transaction) {
       return value;
-    }
+    } 
     const obj = plainToClass(metadata.metatype, value);
     const errors = await validate(obj);
 

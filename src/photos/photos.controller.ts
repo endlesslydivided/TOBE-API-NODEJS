@@ -8,6 +8,7 @@ import { CreatePhotoDto } from "./dto/createPhoto.dto";
 import { UpdatePhotoDto } from "./dto/updatePhoto.dto";
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Photo } from "./photos.model";
+import { FormDataRequest } from "nestjs-form-data";
 
 @ApiTags("Photos")
 @Controller("photos")
@@ -18,14 +19,14 @@ export class PhotosController {
 
   @ApiOperation({ summary: "Photo creation" })
   @ApiCreatedResponse({ type: Photo })
-  @UseInterceptors(TransactionInterceptor, FilesInterceptor("file"))
+  @UseInterceptors(TransactionInterceptor)
+  @FormDataRequest()
   @Post()
   createPhoto(@Body() dto: CreatePhotoDto,
-              @UploadedFile() file,
               @TransactionParam() transaction: Transaction
   ) 
   {
-    return this.photosService.createPhoto(dto, file, transaction);
+    return this.photosService.createPhoto(dto, transaction, dto.file);
   }
 
   @ApiOperation({ summary: "Photo update" })

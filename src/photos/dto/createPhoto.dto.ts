@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsArray, IsNumber, IsOptional, IsString, Length } from "class-validator";
+import { IsFile,HasMimeType, MemoryStoredFile } from "nestjs-form-data";
 
 export class CreatePhotoDto {
 
@@ -17,4 +18,8 @@ export class CreatePhotoDto {
   @IsArray({ message: "Должно быть массивом строк" })
   @IsOptional()
   readonly tags: string[];
+
+  @IsFile()
+  @HasMimeType(['image/jpeg', 'image/png','image/jpg'])
+  readonly file: MemoryStoredFile;
 }

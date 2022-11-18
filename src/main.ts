@@ -4,13 +4,14 @@ import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "./pipes/validation.pipe";
 import { Role } from "./roles/roles.model";
 import { HttpExceptionFilter } from "./filters/httpException.filter";
-
+import { MulterModule } from "@nestjs/platform-express";
+import * as multer from 'multer';
 
 async function start() {
   const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
-  app.useGlobalFilters(new HttpExceptionFilter());
 
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors({
     origin:  true,
     credentials: true,
@@ -39,6 +40,8 @@ async function start() {
   await app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}`);
   });
+
+
 }
 
 start();

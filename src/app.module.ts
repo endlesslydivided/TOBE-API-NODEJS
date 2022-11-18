@@ -28,6 +28,8 @@ import { FilesModule } from "./files/files.module";
 import { FriendsModule } from "./friends/friends.module";
 import { Friend } from "./friends/friends.model";
 import { MailModule } from './mail/mail.module';
+import { MulterModule } from "@nestjs/platform-express";
+import { MemoryStoredFile, NestjsFormDataModule } from "nestjs-form-data";
 
 @Module({
     controllers: [],
@@ -49,6 +51,7 @@ import { MailModule } from './mail/mail.module';
         synchronize: true,
         
       }),
+      NestjsFormDataModule.config({ storage: MemoryStoredFile }),
       UsersModule,
       RolesModule,
       AuthModule,
