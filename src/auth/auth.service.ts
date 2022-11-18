@@ -1,4 +1,4 @@
-import { ForbiddenException, forwardRef, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, forwardRef, HttpException, HttpStatus, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { CreateUserDto } from "../users/dto/createUser.dto";
 import { UsersService } from "../users/users.service";
 import { JwtService } from "@nestjs/jwt";
@@ -68,11 +68,18 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshTokens(user) {
-   
-    const tokens = await this.getTokens(user);
+  async refreshTokens(user) 
+  {
+    const userFromDb = await this.userService.getUserByEmail(user.email);
 
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+    if (!userFromDb) 
+    {
+      throw new BadRequestException("Пользователь с такими данными не существует");
+    }
+
+    const tokens = await this.getTokens(userFromDb);
+
+    await this.updateRefreshToken(userFromDb, tokens.refreshToken);
     return tokens;
   }
 

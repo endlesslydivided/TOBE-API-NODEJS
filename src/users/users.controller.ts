@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
   UsePipes
@@ -50,18 +51,8 @@ export class UsersController {
   @ApiCreatedResponse({ type: User })
   @UsePipes(ValidationPipe)
   @Post()
-  create(@Body() userDto: CreateUserDto) {
+  createUser(@Body() userDto: CreateUserDto) {
     return this.userService.createUser(userDto);
-  }
-
-  @ApiOperation({ summary: "Get me" })
-  @ApiCreatedResponse({ type: User })
-  @UseGuards(AccessTokenGuard)
-  @UsePipes(ValidationPipe)
-  @Get("/me")
-  getMe(@Req() request: Request) 
-  {
-    return this.userService.getUserById(request['user']['id']);
   }
 
   @ApiOperation({ summary: "Get paged users" })

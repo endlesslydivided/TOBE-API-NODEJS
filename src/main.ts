@@ -3,11 +3,14 @@ import { AppModule } from "./app.module";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { ValidationPipe } from "./pipes/validation.pipe";
 import { Role } from "./roles/roles.model";
+import { HttpExceptionFilter } from "./filters/httpException.filter";
 
 
 async function start() {
   const PORT = process.env.PORT || 5000;
   const app = await NestFactory.create(AppModule);
+  app.useGlobalFilters(new HttpExceptionFilter());
+
   app.enableCors({
     origin:  true,
     credentials: true,
@@ -30,8 +33,8 @@ async function start() {
   SwaggerModule.setup("/api/docs", app, document);
 
   app.useGlobalPipes(new ValidationPipe());
-  await Role.create({ name: "USER" , description: 'Basic user role' });
-  await Role.create({ name: "ADMIN", description: 'Admin role' });
+  await Role.findOrCreate({where: {name:"USER"}, defaults:{ name: "USER" , description: 'Basic user role' }});
+  await Role.findOrCreate({where: {name:"ADMIN"}, defaults:{ name: "ADMIN" , description: 'Admin role' }});
 
   await app.listen(PORT, () => {
     console.log(`http://localhost:${PORT}`);

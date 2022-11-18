@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNumber, IsString, Length } from "class-validator";
+import { IsNumber, IsOptional, IsString, Length } from "class-validator";
 
 export class CreateAlbumDto {
   @ApiProperty({ example: "My first album name", description: "Album name" })
@@ -9,7 +9,8 @@ export class CreateAlbumDto {
 
   @ApiProperty({ example: "My first album description", description: "Album description" })
   @IsString({ message: "Должно быть строкой" })
-  @Length(0, 255, { message: "Длина названия альбома: до 255 символов" })
+  @Length(0, 255, { message: "Длина описания альбома: до 255 символов" })
+  @IsOptional()
   description: string;
 
   @ApiProperty({ example: "0", description: "ID of album user" })

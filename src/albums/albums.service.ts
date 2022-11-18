@@ -16,8 +16,9 @@ export class AlbumsService {
 
   async createAlbum(dto: CreateAlbumDto) {
     const user = await this.userService.getUserById(dto.userId);
-    if (user) {
-      return await this.albumsRepository.create(dto);
+    if (user) 
+    {
+      return await this.albumsRepository.findOrCreate({where:{name:dto.name},defaults: dto});
     }
     throw new HttpException("Альбом не создан: пользователь не найден", HttpStatus.NOT_FOUND);
   }

@@ -12,10 +12,20 @@ export class CreateUserDto {
   @Length(1, 50, { message: "Длина фамилии: до 50 символов" })
   readonly lastName: string;
 
-  @ApiProperty({ example: "username", description: "User's username" })
+  @ApiProperty({ example: "Man", description: "Sex" })
   @IsString({ message: "Должно быть строкой" })
-  @Length(3, 25, { message: "Длина логина: до 25 символов" })
-  readonly username: string;
+  @Length(1, 10, { message: "Не больше 10 символов" })
+  readonly sex: string;
+
+  @ApiProperty({ example: "Belarus", description: "User's country of living" })
+  @IsString({ message: "Должно быть строкой" })
+  @Length(1, 50, { message: "Не больше 50 символов" })
+  readonly country: string;
+
+  @ApiProperty({ example: "Minsk", description: "User's city of living" })
+  @IsString({ message: "Должно быть строкой" })
+  @Length(1, 100, { message: "Не больше 100 символов" })
+  readonly city: string;
 
   @ApiProperty({ example: "user@do.men", description: "User's email" })
   @IsString({ message: "Должно быть строкой" })

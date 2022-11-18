@@ -15,14 +15,14 @@ export class RolesController {
   @ApiOperation({ summary: "Role creation" })
   @ApiResponse({ status: 200, type: Role })
   @Post()
-  create(@Body() roleDto: CreateRoleDto) {
+  createRole(@Body() roleDto: CreateRoleDto) {
     return this.roleService.createRole(roleDto);
   }
 
   @ApiOperation({ summary: "Get all roles" })
   @ApiResponse({ status: 200, type: [Role] })
   @Get(`/:name`)
-  getAll(@Param("name") name: string) {
+  getAllRoles(@Param("name") name: string) {
     return this.roleService.getRoleByName(name);
   }
 }

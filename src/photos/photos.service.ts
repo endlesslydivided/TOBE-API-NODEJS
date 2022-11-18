@@ -66,7 +66,7 @@ export class PhotosService {
 
   async getAllPhotoByAlbum(albumId: number) {
     const album = await this.albumsService.getById(albumId);
-    if (albumId) {
+    if (album) {
       return await this.photosRepository.findAll({ where: { albumId }, order: [["createdAt", "DESC"]] });
     }
     throw new HttpException("Фото не найдены: альбом не существует", HttpStatus.NOT_FOUND);

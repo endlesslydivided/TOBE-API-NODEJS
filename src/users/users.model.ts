@@ -43,10 +43,6 @@ export class User extends Model<User, UserCreationAttribute> {
   @Column({ type: DataType.STRING, allowNull: false })
   lastName: string;
 
-  @ApiProperty({ example: "username", description: "User's username" })
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
-  username: string;
-
   @ApiProperty({ example: "user@do.men", description: "User's email" })
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   email: string;
@@ -67,6 +63,18 @@ export class User extends Model<User, UserCreationAttribute> {
   @ApiProperty({ example: "+375336947859", description: "User's phone number" })
   @Column({ type: DataType.STRING, unique: true, allowNull: false })
   phoneNumber: string;
+
+  @ApiProperty({ example: "Man", description: "Sex" })
+  @Column({ type: DataType.STRING, allowNull: false})
+  sex: string;
+
+  @ApiProperty({ example: "Belarus", description: "User's country of living" })
+  @Column({ type: DataType.STRING, allowNull: false})
+  country: string;
+
+  @ApiProperty({ example: "Minsk", description: "User's city of living" })
+  @Column({ type: DataType.STRING, allowNull: false})
+  city: string;
 
   @ApiProperty({ example: "false", description: "Is user's phone number confirmed?" })
   @Default(false)

@@ -1,41 +1,49 @@
-import { ExecutionContext, forwardRef, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { ExecutionContext, ForbiddenException, forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
-import { Observable, throwError, throwIfEmpty } from 'rxjs';
-import { AuthService } from '../auth.service';
+import { Request } from 'express';
 
 @Injectable()
-export class AccessTokenGuard extends AuthGuard('jwt') {
-    constructor(@Inject(forwardRef(() => JwtService)) private jwtService: JwtService) {
-        super();
-    }
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
-        try 
-        {
-          const request: Request = context.switchToHttp().getRequest();
+export class AccessTokenGuard extends AuthGuard('jwt') 
+{
+  constructor(@Inject(forwardRef(() => JwtService)) private jwtService: JwtService) 
+  {
+    super();
+  }
 
-          const authHeader = request.header('Authorization').split(' ');
-          const result = this.jwtService.verify(authHeader[1],{algorithms:['RS256'] ,publicKey: process.env.ACCESS_TOKEN_PUBLIC});
-          if(authHeader[0] === 'Bearer' && result)
-          {
-            return true;
+  async canActivate(context: ExecutionContext): Promise<boolean>  
+  {
+    try 
+    {
+      const request: Request = context.switchToHttp().getRequest();
+      const cookie =request.header('cookie');
+      if(cookie)
+      {
+        const accessTokenString = cookie.split("; ")[0].split('accessToken=')[1];
+        if(accessTokenString)
+        {
+          const accessToken = JSON.parse(decodeURIComponent(accessTokenString));
+          if(accessToken?.token && accessToken?.type === 'Bearer')         
+          { 
+            const decoded = await this.jwtService.verifyAsync(accessToken.token,{algorithms:['RS256'] ,publicKey: process.env.ACCESS_TOKEN_PUBLIC});
+            if(decoded)
+            {
+              request['principal'] = decoded;
+              return true;
+            }   
           }
-
-          throw new HttpException("Пользователь не имеет доступа", HttpStatus.FORBIDDEN);
-        } 
-        catch (error) 
-        {
-            if (error instanceof HttpException) 
-            {
-                throw error;
-            } 
-            else 
-            {
-                throw new HttpException("Ошибка на стороне сервера", HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
+        }     
       }
+     
+      throw new ForbiddenException("Пользователь не имеет доступа");
+    } 
+    catch (error) 
+    {
+        if (error instanceof HttpException) 
+        {
+            throw error;
+        } 
+        throw new InternalServerErrorException("Ошибка на стороне сервера");
+    }
+  }
 }

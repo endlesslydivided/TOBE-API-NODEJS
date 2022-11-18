@@ -53,7 +53,7 @@ export class UsersService {
         attributes: ['name']  
       }
     ],
-    attributes:['id','firstName','lastName','username','email','emailConfirmed','phoneNumber','mainPhoto','refreshToken']
+    attributes:['id','firstName','lastName','email','emailConfirmed','phoneNumber','mainPhoto','refreshToken']
   });
   }
 
@@ -72,7 +72,7 @@ export class UsersService {
     throw new HttpException("Пользователь или роль не найдены", HttpStatus.NOT_FOUND);
   }
 
-  async updateUserById( id, dto: UpdateUserDto) 
+  async updateUserById(id, dto: UpdateUserDto) 
   {
     return await (await this.userRepository.findByPk(id)).update(dto);
   }

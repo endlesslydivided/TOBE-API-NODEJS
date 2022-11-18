@@ -23,7 +23,8 @@ export class PhotosController {
   createPhoto(@Body() dto: CreatePhotoDto,
               @UploadedFile() file,
               @TransactionParam() transaction: Transaction
-  ) {
+  ) 
+  {
     return this.photosService.createPhoto(dto, file, transaction);
   }
 
