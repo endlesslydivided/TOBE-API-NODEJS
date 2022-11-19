@@ -26,7 +26,7 @@ export class PhotosController {
               @TransactionParam() transaction: Transaction
   ) 
   {
-    return this.photosService.createPhoto(dto, transaction, dto.file);
+    return this.photosService.createPhoto(dto, transaction);
   }
 
   @ApiOperation({ summary: "Photo update" })

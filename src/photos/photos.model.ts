@@ -8,6 +8,7 @@ interface PhotoCreationAttribute {
   name: string;
   description: string;
   albumId: number;
+  path:string;
 }
 
 @Table({ tableName: "photos", timestamps: true, createdAt: "createdAt", updatedAt: "updatedAt" })

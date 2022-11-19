@@ -10,6 +10,7 @@ import { AlbumsModule } from "../albums/albums.module";
 import { UsersModule } from "../users/users.module";
 import { FilesModule } from "../files/files.module";
 import { TagsModule } from "../tags/tags.module";
+import { NestjsFormDataModule } from "nestjs-form-data";
 
 @Module({
   providers: [PhotosService],
@@ -20,8 +21,8 @@ import { TagsModule } from "../tags/tags.module";
       forwardRef(() => AlbumsModule),
       forwardRef(() => UsersModule),
       forwardRef(() => FilesModule),
-      forwardRef(() => TagsModule)
-
+      forwardRef(() => TagsModule),
+      NestjsFormDataModule
     ],
   exports:
     [

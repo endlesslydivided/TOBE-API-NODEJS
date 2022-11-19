@@ -1,9 +1,9 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { Photo } from "./photos.model";
 import { AlbumsService } from "../albums/albums.service";
 import { UsersService } from "../users/users.service";
-import { throwError } from "rxjs";
+import { NotFoundError, throwError } from "rxjs";
 import { FilesService } from "../files/files.service";
 import { Transaction } from "sequelize";
 import { CreatePhotoDto } from "./dto/createPhoto.dto";
@@ -25,27 +25,30 @@ export class PhotosService {
   }
 
 
-  async createPhoto(dto: CreatePhotoDto, transaction: Transaction, file: any) {
-    this.albumsService.getById(dto.albumId).catch((error) => {
-      throw new HttpException("Фото не добавлено: альбом не найден", HttpStatus.NOT_FOUND);
+  async createPhoto(dto: CreatePhotoDto, transaction: Transaction) 
+  {
+    const album = await this.albumsService.getById(dto.albumId).catch(() => {
+      throw new NotFoundException("Фото не добавлено: альбом не найден");
     });
 
-    const photo = await this.filesService.createFile(file).then(async (path) => {
-      return await this.photosRepository.create(dto, { transaction });
-    }).catch((e) => {
-      throw throwError(e);
+    const photo = await this.filesService.createFile(dto.file).then(async (path) => 
+    {
+      const {file,...photoDto} = dto;
+      return await this.photosRepository.create({path,...photoDto}, {returning:true, transaction });
     });
 
-    if (photo) {
-      const newTags = await this.tagsService.createTags(this.ANYABLE_TYPE, photo.id, dto.tags, transaction).catch((error) => {
-        throw new HttpException("Фото не добавлено: ошибка добавления тегов", HttpStatus.INTERNAL_SERVER_ERROR);
+    if (photo) 
+    {
+      const newTags = await this.tagsService.createTags(this.ANYABLE_TYPE, photo.id, dto?.tags, transaction).catch(() => {
+        throw new InternalServerErrorException("Фото не добавлено: ошибка добавления тегов");
       });
 
       return photo;
     }
-    throw new HttpException("Фото не добавлено. Ошибка не стороне сервера", HttpStatus.INTERNAL_SERVER_ERROR);
 
+    throw new InternalServerErrorException("Фото не добавлено. Ошибка не стороне сервера");
   }
+
 
   async updatePhoto(id: number, dto: UpdatePhotoDto, transaction: Transaction) {
     this.photosRepository.findByPk(id).catch((error) => {

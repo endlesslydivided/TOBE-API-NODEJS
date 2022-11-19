@@ -53,7 +53,7 @@ export class AlbumsService {
     throw new HttpException("Сообщения не найдены: диалог не существует", HttpStatus.NOT_FOUND);
   }
 
-  async getById(id: number) {
+  async getById(id: number|string) {
     const album = await this.albumsRepository.findByPk(id);
     if (album) {
       return album;

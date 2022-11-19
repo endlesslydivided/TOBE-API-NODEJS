@@ -7,6 +7,8 @@ import { AddRoleDto } from "./dto/addRole.dto";
 import { UpdateUserDto } from "./dto/updateUser.dto";
 import { Album } from "src/albums/albums.model";
 import { Role } from "src/roles/roles.model";
+import { Photo } from "src/photos/photos.model";
+import { Sequelize } from "sequelize";
 
 @Injectable()
 export class UsersService {
@@ -40,7 +42,8 @@ export class UsersService {
       {
         model: Role,
         attributes: ['name']  
-      }
+      },
+      {model:Photo}
     ]
   });
   }
@@ -74,11 +77,15 @@ export class UsersService {
 
   async updateUserById(id, dto: UpdateUserDto) 
   {
-    return await (await this.userRepository.findByPk(id)).update(dto);
+    const user = await this.userRepository.findByPk(id);
+
+    return user.update(dto);
   }
 
   async updateRefreshTokenById(id, refreshToken) 
   {
-    return await (await this.userRepository.findByPk(id)).update({refreshToken});
+    const user = await this.userRepository.findByPk(id);
+
+    return await user.update({refreshToken});
   }
 }

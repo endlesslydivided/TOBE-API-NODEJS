@@ -10,11 +10,12 @@ export class TagsService {
     @InjectModel(Tag) private tagsRepository: typeof Tag) {
   }
 
-  async createTags(taggableType: string, taggableId: number, tags: string[], transaction: Transaction) {
-    return tags.map(async (name) => {
-        return await this.tagsRepository.create({ name, taggableType, taggableId }, { transaction });
-      }
-    );
+  async createTags(taggableType: string, taggableId: number, tags: string[], transaction: Transaction) 
+  {
+    return tags?.map(async (name) => 
+    {
+        return await this.tagsRepository.create({ name, taggableType, taggableId }, {returning:true, transaction });
+    });
   }
 
   async updateTags(tagsIds: number[], newTags: string[], taggableType: string, taggableId: number, transaction: Transaction): Promise<any[]> {

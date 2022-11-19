@@ -30,6 +30,8 @@ import { Friend } from "./friends/friends.model";
 import { MailModule } from './mail/mail.module';
 import { MulterModule } from "@nestjs/platform-express";
 import { MemoryStoredFile, NestjsFormDataModule } from "nestjs-form-data";
+import { ServeStaticModule } from "@nestjs/serve-static";
+import {join} from "path";
 
 @Module({
     controllers: [],
@@ -51,7 +53,10 @@ import { MemoryStoredFile, NestjsFormDataModule } from "nestjs-form-data";
         synchronize: true,
         
       }),
-      NestjsFormDataModule.config({ storage: MemoryStoredFile }),
+      ServeStaticModule.forRoot({
+        rootPath: join(__dirname, '.', 'static'),
+      }),
+      NestjsFormDataModule,
       UsersModule,
       RolesModule,
       AuthModule,

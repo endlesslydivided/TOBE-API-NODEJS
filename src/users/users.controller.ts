@@ -7,6 +7,7 @@ import {
   Inject,
   Param,
   Post,
+  Put,
   Query,
   Req,
   UploadedFile,
@@ -32,6 +33,7 @@ import { TransactionParam } from "../decorators/transactionParam.decorator";
 import { Transaction } from "sequelize";
 import { Request } from "express";
 import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
+import { UpdateUserDto } from "./dto/updateUser.dto";
 
 @ApiTags("Users")
 @Controller("users")
@@ -47,12 +49,13 @@ export class UsersController {
   ) {
   }
 
-  @ApiOperation({ summary: "User creation" })
+  @ApiOperation({ summary: "User update" })
   @ApiCreatedResponse({ type: User })
   @UsePipes(ValidationPipe)
-  @Post()
-  createUser(@Body() userDto: CreateUserDto) {
-    return this.userService.createUser(userDto);
+  @Put("/:id")
+  updateUser(@Body() userDto: UpdateUserDto,@Param("id") id: number) 
+  {
+    return this.userService.updateUserById(id,userDto);
   }
 
   @ApiOperation({ summary: "Get paged users" })
@@ -138,7 +141,8 @@ export class UsersController {
   deleteFriend(@Param("userId") userId: number,
                @Param("id") id: number,
                @TransactionParam() transaction: Transaction
-  ) {
+  ) 
+  {
     return this.friendsService.deleteFriend(userId, id, transaction);
   }
 }
