@@ -64,8 +64,19 @@ export class UsersController {
   // @Roles("USER")
   @Get()
   getPagedUsers(@Query("page") page: number,
-                @Query("limit") limit: number) {
+                @Query("limit") limit: number) 
+  {
     return this.userService.getPagedUsers(limit, page);
+  }
+
+  @ApiOperation({ summary: "Get user" })
+  @ApiOkResponse({ type: "{rows:User[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
+  @Get("/:id")
+  getUser(@Param("id") id: number) 
+  {
+    return this.userService.getUserById(id);
   }
 
 

@@ -9,6 +9,7 @@ import { Album } from "src/albums/albums.model";
 import { Role } from "src/roles/roles.model";
 import { Photo } from "src/photos/photos.model";
 import { Sequelize } from "sequelize";
+import { Friend } from "src/friends/friends.model";
 
 @Injectable()
 export class UsersService {
@@ -54,15 +55,22 @@ export class UsersService {
       {
         model: Role,
         attributes: ['name']  
-      }
+      },
+      Photo,
+      Friend
     ],
-    attributes:['id','firstName','lastName','email','emailConfirmed','phoneNumber','mainPhoto','refreshToken']
+    attributes:['id','firstName','lastName','email','city','country',
+                'emailConfirmed','phoneNumber','mainPhoto','refreshToken']
   });
   }
 
-  async getPagedUsers(limit: number = 9, page: number = 0) {
+  async getPagedUsers(limit: number = 10, page: number = 1) 
+  {
     const offset = page * limit - limit;
-    return await this.userRepository.findAndCountAll({ limit, offset, order: [["createdAt", "DESC"]] });
+    return await this.userRepository.findAndCountAll({ limit, offset, order: [["createdAt", "DESC"]], include:
+    [
+      Photo,
+    ] });
   }
 
   async addRole(dto: AddRoleDto) {
