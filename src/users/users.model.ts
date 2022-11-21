@@ -53,7 +53,7 @@ export class User extends Model<User, UserCreationAttribute> {
   emailConfirmed: boolean;
 
   @ApiProperty({ example: "12345", description: "User's password hash" })
-  @Column({ type: DataType.STRING, unique: true, allowNull: false })
+  @Column({ type: DataType.STRING, unique: false, allowNull: false })
   password: string;
 
   @ApiProperty({ example: "12345", description: "User's password hash salt" })

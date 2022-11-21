@@ -26,39 +26,36 @@ export class FriendsService {
       return friend;
     }
 
-    throw new HttpException("Друг не добавлен", HttpStatus.INTERNAL_SERVER_ERROR);
+    throw new InternalServerErrorException("Друг не добавлен");
   }
 
   async updateFriend(id: number, dto: UpdateFriendDto, transaction: Transaction) 
   {
     const friend = await this.getFriendById(id);
 
-    const newFriend = { ...friend, ...dto };
+    const userId = friend.friendId;
+    const friendId = friend.userId;
 
-    this.friendRepository.update(newFriend, { where: { id }, transaction, returning: true }).catch(() => 
+    this.friendRepository.update(dto, { where: { id }, transaction}).catch(() => 
     {
       throw new InternalServerErrorException("Друг не обновлен");
     });
 
-    if (newFriend.isRejected === null) 
+    this.friendRepository.create({userId,friendId}, { transaction }).catch(() => 
     {
-      const { friendId: userId, userId: friendId, isRejected } = dto;
-      
-      this.friendRepository.create(dto, { transaction }).then((friend) => friend).catch(() => 
-      {
-        throw new InternalServerErrorException("Друг не создан");
-      });
-    }
+      throw new InternalServerErrorException("Друг не создан");
+    });
   }
 
-  async deleteFriend(userId: number, friendId: number, transaction: Transaction) {
-    const friend = await this.friendRepository.findOne({ where: { userId, friendId } });
+  async deleteFriend(id:number, transaction: Transaction) 
+  {
+    const friend = await this.friendRepository.findByPk(id);
 
-    const affected = await this.friendRepository.destroy({ where: { userId }, transaction }).catch(() => {
+    const affected = await this.friendRepository.destroy({where:{id:friend.id}, transaction }).catch(() => {
       throw new InternalServerErrorException("Друг не удалён");
     });
 
-    this.friendRepository.update({ isRejected: true }, { where: { userId }, transaction }).catch(() => {
+    this.friendRepository.update({ isRejected: null }, { where: { userId:friend.friendId, friendId:friend.userId }, transaction }).catch(() => {
       throw new InternalServerErrorException("Друг не удалён. Обновление записи не удалось");
     });
 
@@ -75,7 +72,7 @@ export class FriendsService {
     throw new NotFoundException("Друг не найден");
   }
 
-  async getPagedFriendsByUser(userId: number, limit: number = 9, page: number = 0) 
+  async getPagedFriendsByUser(userId: number, limit: number = 10, page: number = 1) 
   {
     this.usersService.getUserById(userId).catch(() => 
     {
@@ -94,6 +91,50 @@ export class FriendsService {
       })
       .then((result) => result)
       .catch((rror) => {
+        throw new InternalServerErrorException("Друзья не найдены");
+      });
+  }
+
+  async getPagedRequestsByUser(userId: number, limit: number = 10, page: number = 1) 
+  {
+    this.usersService.getUserById(userId).catch(() => 
+    {
+      throw new NotFoundException("Друзья не найдены: пользователь не найден");
+    });
+
+    const offset = page * limit - limit;
+    return this.friendRepository.findAndCountAll(
+      {
+        limit, offset,
+        where:
+          {
+            userId,
+            isRejected: false
+          },
+        order: [["createdAt", "DESC"]]
+      })
+      .then((result) => result)
+      .catch(() => {
+        throw new InternalServerErrorException("Заявки не найдены");
+      });
+  }
+
+
+  async getFriendsByUser(userId: number) 
+  {
+    this.usersService.getUserById(userId).catch(() => 
+    {
+      throw new NotFoundException("Друзья не найдены: пользователь не найден");
+    });
+
+    return this.friendRepository.findAndCountAll
+    (
+      {
+        where:{userId},
+        order: [["createdAt", "DESC"]]
+      })
+      .then((result) => result)
+      .catch(() => {
         throw new InternalServerErrorException("Друзья не найдены");
       });
   }

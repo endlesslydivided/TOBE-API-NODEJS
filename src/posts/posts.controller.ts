@@ -16,7 +16,7 @@ export class PostsController {
   constructor(private postService: PostsService) {
   }
 
-  @ApiOperation({ summary: "Create photo" })
+  @ApiOperation({ summary: "Create post" })
   @ApiCreatedResponse({ type: Photo })
   @UseInterceptors(TransactionInterceptor, FilesInterceptor("files"))
   @Post()
@@ -27,7 +27,7 @@ export class PostsController {
     return this.postService.createPost(dto, files, transaction);
   }
 
-  @ApiOperation({ summary: "Update photo" })
+  @ApiOperation({ summary: "Update post" })
   @ApiOkResponse()
   @UseInterceptors(TransactionInterceptor, FilesInterceptor("files"))
   @Put("/:id")
@@ -38,14 +38,14 @@ export class PostsController {
     return this.postService.updatePost(id, dto, files, transaction);
   }
 
-  @ApiOperation({ summary: "Delete photo" })
+  @ApiOperation({ summary: "Delete post" })
   @ApiNoContentResponse()
   @Delete("/:id")
   deletePost(@Param("id") id: number) {
     return this.postService.deletePost(id);
   }
 
-  @ApiOperation({ summary: "Get one photo" })
+  @ApiOperation({ summary: "Get one post" })
   @ApiOkResponse({ type: Post })
   @Get("/:id")
   getOnePost(@Param("id") id: number) {

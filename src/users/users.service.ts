@@ -59,7 +59,7 @@ export class UsersService {
       Photo,
       Friend
     ],
-    attributes:['id','firstName','lastName','email','city','country',
+    attributes:['id','firstName','lastName','email','city','country','sex',
                 'emailConfirmed','phoneNumber','mainPhoto','refreshToken']
   });
   }

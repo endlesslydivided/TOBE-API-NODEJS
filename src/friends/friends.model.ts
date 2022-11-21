@@ -26,7 +26,7 @@ export class Friend extends Model<Friend, FriendCreationAttribute> {
 
   @ApiProperty({ example: "0", description: "Did a friend reject a request?" })
   @Default(false)
-  @Column({ type: DataType.BOOLEAN })
+  @Column({ type: DataType.BOOLEAN, allowNull:true})
   isRejected: boolean;
 
 }

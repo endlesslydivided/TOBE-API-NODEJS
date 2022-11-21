@@ -91,6 +91,27 @@ export class UsersController {
     return this.friendsService.getPagedFriendsByUser(id, limit, page);
   }
 
+  @ApiOperation({ summary: "Get paged user's friends" })
+  @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
+  @Get("/:id/friends")
+  getAllFriendsByUser(@Param("id") id: number) {
+    return this.friendsService.getFriendsByUser(id);
+  }
+
+  @ApiOperation({ summary: "Get paged user's friends" })
+  @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
+  @Get("/:id/requests")
+  getPagedFriendsRequestsByUser(@Param("id") id: number,
+                        @Query("page") page: number,
+                        @Query("limit") limit: number) 
+  {
+    return this.friendsService.getPagedRequestsByUser(id, limit, page);
+  }
+
   @ApiOperation({ summary: "Get paged user's albums" })
   @ApiOkResponse()
   // @UseGuards(RolesGuard)
@@ -129,7 +150,7 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   //@Roles("USER")
   @Get("/:id/feed")
-  getPagedSubsByUser(@Param("id") id: number,
+  getPagedFeedByUser(@Param("id") id: number,
                      @Query("page") page: number,
                      @Query("limit") limit: number) {
     return this.postsService.getPagedPostByUserSubscriptions(id, limit, page);
@@ -145,15 +166,4 @@ export class UsersController {
     return this.userService.addRole(dto);
   }
 
-  @ApiOperation({ summary: "Delete friend" })
-  @ApiNoContentResponse()
-  @UseInterceptors(TransactionInterceptor)
-  @Delete("/:userId/friends/:id")
-  deleteFriend(@Param("userId") userId: number,
-               @Param("id") id: number,
-               @TransactionParam() transaction: Transaction
-  ) 
-  {
-    return this.friendsService.deleteFriend(userId, id, transaction);
-  }
 }
