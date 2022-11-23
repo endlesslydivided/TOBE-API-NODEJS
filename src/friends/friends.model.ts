@@ -1,4 +1,4 @@
-import { Column, DataType, Default, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, Default, ForeignKey, HasOne, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../users/users.model";
 
@@ -25,8 +25,11 @@ export class Friend extends Model<Friend, FriendCreationAttribute> {
   userId: number;
 
   @ApiProperty({ example: "0", description: "Did a friend reject a request?" })
-  @Default(false)
+  @Default(null)
   @Column({ type: DataType.BOOLEAN, allowNull:true})
   isRejected: boolean;
+
+  @BelongsTo(() => User,"userId")
+  user: User;
 
 }

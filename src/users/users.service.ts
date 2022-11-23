@@ -10,6 +10,8 @@ import { Role } from "src/roles/roles.model";
 import { Photo } from "src/photos/photos.model";
 import { Sequelize } from "sequelize";
 import { Friend } from "src/friends/friends.model";
+import { Op } from "sequelize";
+import { FilterUserParams } from "./filterParams/filterUser.params";
 
 @Injectable()
 export class UsersService {
@@ -44,7 +46,8 @@ export class UsersService {
         model: Role,
         attributes: ['name']  
       },
-      {model:Photo}
+      {model:Photo},
+      Friend
     ]
   });
   }
@@ -60,14 +63,24 @@ export class UsersService {
       Friend
     ],
     attributes:['id','firstName','lastName','email','city','country','sex',
-                'emailConfirmed','phoneNumber','mainPhoto','refreshToken']
+                'emailConfirmed','phoneNumber','mainPhoto']
   });
   }
 
-  async getPagedUsers(limit: number = 10, page: number = 1) 
+  async getPagedUsers(limit: number = 10, page: number = 1,filters:FilterUserParams) 
   {
     const offset = page * limit - limit;
-    return await this.userRepository.findAndCountAll({ limit, offset, order: [["createdAt", "DESC"]], include:
+    return await this.userRepository.findAndCountAll({limit, offset,where:
+      {
+        [Op.or]:
+        {
+          sex:      { [Op.like]: '%' + filters.sex + '%' } ,
+          country:  { [Op.like]: '%' + filters.country + '%' } ,
+          city:     { [Op.like]: '%' + filters.city + '%' } ,
+          '$Photo.path$': filters.havePhoto ?  {[Op.or]:{[Op.eq]: null,[Op.ne]: null}} : {[Op.ne]: null}
+        }
+      },
+       order: [["createdAt", "DESC"]], include:
     [
       Photo,
     ] });

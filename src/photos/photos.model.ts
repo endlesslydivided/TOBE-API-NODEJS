@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, HasOne, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../users/users.model";
 import { Album } from "../albums/albums.model";
@@ -30,7 +30,7 @@ export class Photo extends Model<Photo, PhotoCreationAttribute> {
   @Column({ type: DataType.INTEGER, allowNull: true })
   albumId: number;
 
-  @HasOne(() => User, "mainPhoto")
+  @BelongsTo(() => User, "mainPhoto")
   user: User;
 
   @HasMany(() => Tag, {

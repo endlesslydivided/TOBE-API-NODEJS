@@ -1,10 +1,14 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { UsersService } from "../users/users.service";
 import { InjectModel } from "@nestjs/sequelize";
-import { Transaction } from "sequelize";
+import { Sequelize, Transaction } from "sequelize";
 import { Friend } from "./friends.model";
 import { CreateFriendDto } from "./dto/createFriend.dto";
 import { UpdateFriendDto } from "./dto/updateFriend.dto";
+import { User } from "src/users/users.model";
+import { Op } from "sequelize";
+import { Photo } from "src/photos/photos.model";
+import sequelize from "sequelize";
 
 @Injectable()
 export class FriendsService {
@@ -15,18 +19,31 @@ export class FriendsService {
 
   async createFriend(dto: CreateFriendDto, transaction: Transaction) 
   {
-    this.usersService.getUserById(dto.userId).catch(() => {
-      throw new NotFoundException("Друг не добавлен: пользователь не найден");
+    const user = await this.usersService.getUserById(dto.userId).catch(() => {
+      throw new NotFoundException("Друг не добавлен. Ошибка на стороне сервера.");
     });
 
-    const friend = await this.friendRepository.create(dto, { transaction });
-
-    if (friend) 
+    if(!user) throw new NotFoundException("Друг не добавлен: пользователь не найден");
+    const anotherFriend = await this.friendRepository.findOne({where: { userId:dto.friendId, friendId:dto.userId }});
+    let friend;
+    if(anotherFriend)
     {
-      return friend;
+      friend = await this.friendRepository.create({...dto,isRejected:false}, { transaction });
+      anotherFriend.set({isRejected:false});
+      await anotherFriend.save({fields:['isRejected'],transaction})
+      .catch(() => 
+      {
+        throw new InternalServerErrorException("Друг не удалён. Обновление записи не удалось");
+      })
     }
-
-    throw new InternalServerErrorException("Друг не добавлен");
+    else
+    {
+      friend = await this.friendRepository.create(dto, { transaction });
+    }
+    
+    if (!friend) throw new InternalServerErrorException("Друг не добавлен. Ошибка на стороне сервера.");
+    
+    return friend;
   }
 
   async updateFriend(id: number, dto: UpdateFriendDto, transaction: Transaction) 
@@ -36,15 +53,18 @@ export class FriendsService {
     const userId = friend.friendId;
     const friendId = friend.userId;
 
-    this.friendRepository.update(dto, { where: { id }, transaction}).catch(() => 
+    const updatedRow = await this.friendRepository.update(dto, { where: { id },transaction}).catch((error) => 
     {
       throw new InternalServerErrorException("Друг не обновлен");
     });
 
-    this.friendRepository.create({userId,friendId}, { transaction }).catch(() => 
+    if(dto.isRejected === false)
     {
-      throw new InternalServerErrorException("Друг не создан");
-    });
+      return this.friendRepository.create({userId,friendId,isRejected:false}, { transaction }).catch((error) => 
+      {
+        throw new InternalServerErrorException("Друг не создан");
+      });
+    }
   }
 
   async deleteFriend(id:number, transaction: Transaction) 
@@ -54,17 +74,29 @@ export class FriendsService {
     const affected = await this.friendRepository.destroy({where:{id:friend.id}, transaction }).catch(() => {
       throw new InternalServerErrorException("Друг не удалён");
     });
+    
+    const anotherFriend = await this.friendRepository.findOne({where: { userId:friend.friendId, friendId:friend.userId }});
 
-    this.friendRepository.update({ isRejected: null }, { where: { userId:friend.friendId, friendId:friend.userId }, transaction }).catch(() => {
-      throw new InternalServerErrorException("Друг не удалён. Обновление записи не удалось");
-    });
-
+    if(anotherFriend)
+    {
+      anotherFriend.set({isRejected: null});
+      await anotherFriend.save({fields:['isRejected'],transaction,omitNull:false})
+      .catch(() => 
+      {
+        throw new InternalServerErrorException("Друг не удалён. Обновление записи не удалось");
+      })
+    }
+   
     return affected;
   }
 
   async getFriendById(id: number) 
   {
-    const friend = await this.friendRepository.findByPk(id);
+    const friend = await this.friendRepository.findByPk(id,{include:
+    {
+      model: User,
+      attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto']
+    }});
     if (friend) 
     {
       return friend;
@@ -74,23 +106,45 @@ export class FriendsService {
 
   async getPagedFriendsByUser(userId: number, limit: number = 10, page: number = 1) 
   {
-    this.usersService.getUserById(userId).catch(() => 
+    const user = await this.usersService.getUserById(userId).catch((error) => 
     {
       throw new NotFoundException("Друзья не найдены: пользователь не найден");
     });
+
+    if(!user) throw new NotFoundException("Друзья не найдены: пользователь не найден");
 
     const offset = page * limit - limit;
     return this.friendRepository.findAndCountAll(
       {
         limit, offset,
         where:
+        {
+          userId: 
           {
-            userId
-          },
+              [Op.in]: Sequelize.literal(`(
+              SELECT "Friend"."userId"
+              FROM "friends" AS "Friend"
+              WHERE
+              "Friend"."friendId" = ${userId}
+                  AND
+              "Friend"."isRejected" is false
+          )`)
+          }
+          
+        },
+        include:
+        [{
+          model: User,
+          attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto'],
+          include:
+          [
+            {model:Photo}
+          ]
+        }],
         order: [["createdAt", "DESC"]]
       })
-      .then((result) => result)
-      .catch((rror) => {
+      .catch((error) => {
+        console.log(error);
         throw new InternalServerErrorException("Друзья не найдены");
       });
   }
@@ -108,13 +162,71 @@ export class FriendsService {
         limit, offset,
         where:
           {
-            userId,
-            isRejected: false
+            userId: 
+          {
+              [Op.in]: Sequelize.literal(`(
+              SELECT "Friend"."userId"
+              FROM "friends" AS "Friend"
+              WHERE
+              "Friend"."friendId" = ${userId}
+                  AND
+              "Friend"."isRejected" is null
+          )`)
+          }
           },
+        include:
+        [{
+          model: User,
+          attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto'],
+          include:
+          [
+            {model:Photo}
+          ]
+        }],
         order: [["createdAt", "DESC"]]
       })
-      .then((result) => result)
-      .catch(() => {
+      .catch((error) => {
+        throw new InternalServerErrorException("Заявки не найдены");
+      });
+  }
+
+  async getPagedAvoidedRequestsByUser(userId: number, limit: number = 10, page: number = 1) 
+  {
+    this.usersService.getUserById(userId).catch(() => 
+    {
+      throw new NotFoundException("Друзья не найдены: пользователь не найден");
+    });
+
+    const offset = page * limit - limit;
+    return this.friendRepository.findAndCountAll(
+      {
+        limit, offset,
+        where:
+          {
+            userId: 
+          {
+              [Op.in]: Sequelize.literal(`(
+              SELECT "Friend"."userId"
+              FROM "friends" AS "Friend"
+              WHERE
+              "Friend"."friendId" = ${userId}
+                  AND
+              "Friend"."isRejected" = true
+          )`)
+          }
+          },
+        include:
+        [{
+          model: User,
+          attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto'],
+          include:
+          [
+            {model:Photo}
+          ]
+        }],
+        order: [["createdAt", "DESC"]]
+      })
+      .catch((error) => {
         throw new InternalServerErrorException("Заявки не найдены");
       });
   }
@@ -131,10 +243,18 @@ export class FriendsService {
     (
       {
         where:{userId},
-        order: [["createdAt", "DESC"]]
+        order: [["createdAt", "DESC"]],
+        include:[
+        {
+          model: User,
+          attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto'],
+          include:
+          [
+            {model:Photo}
+          ]
+        }]
       })
-      .then((result) => result)
-      .catch(() => {
+      .catch((error) => {
         throw new InternalServerErrorException("Друзья не найдены");
       });
   }

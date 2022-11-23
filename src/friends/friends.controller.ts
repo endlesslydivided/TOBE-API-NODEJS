@@ -19,8 +19,7 @@ export class FriendsController {
   @ApiCreatedResponse({ type: Friend })
   @UseInterceptors(TransactionInterceptor)
   @Post()
-  createFriend(@Body() dto: CreateFriendDto,
-              @TransactionParam() transaction: Transaction
+  createFriend(@Body() dto: CreateFriendDto,@TransactionParam() transaction: Transaction
   ) {
     return this.friendsService.createFriend(dto, transaction);
   }

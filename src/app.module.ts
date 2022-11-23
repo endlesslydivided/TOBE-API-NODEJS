@@ -41,7 +41,7 @@ import {join} from "path";
         envFilePath: `.${process.env.NODE_ENV}.env`
       }),
       SequelizeModule.forRoot({
-        logging: false,
+        logging: true,
         dialect: "postgres",
         host: process.env.POSTGRES_HOST,
         port: Number(process.env.POSTGRES_PORT),
@@ -50,8 +50,7 @@ import {join} from "path";
         database: process.env.POSTGRES_DB,
         models: [User, Role, UserRoles, Dialog, UserDialog, Message, Post, Attachment, Category, Album, Photo, Tag, Friend],
         autoLoadModels: true,
-        synchronize: true,
-        
+        synchronize: true
       }),
       ServeStaticModule.forRoot({
         rootPath: join(__dirname, '.', 'static'),

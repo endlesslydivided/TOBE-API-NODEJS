@@ -142,5 +142,4 @@ export class User extends Model<User, UserCreationAttribute> {
   })
   friends: Friend[];
 
-
 }

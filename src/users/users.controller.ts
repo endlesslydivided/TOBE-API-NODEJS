@@ -34,6 +34,7 @@ import { Transaction } from "sequelize";
 import { Request } from "express";
 import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 import { UpdateUserDto } from "./dto/updateUser.dto";
+import { FilterUserParams } from "./filterParams/filterUser.params";
 
 @ApiTags("Users")
 @Controller("users")
@@ -64,9 +65,10 @@ export class UsersController {
   // @Roles("USER")
   @Get()
   getPagedUsers(@Query("page") page: number,
-                @Query("limit") limit: number) 
+                @Query("limit") limit: number,
+                @Query() filters: FilterUserParams) 
   {
-    return this.userService.getPagedUsers(limit, page);
+    return this.userService.getPagedUsers(limit, page,filters);
   }
 
   @ApiOperation({ summary: "Get user" })
@@ -91,16 +93,9 @@ export class UsersController {
     return this.friendsService.getPagedFriendsByUser(id, limit, page);
   }
 
-  @ApiOperation({ summary: "Get paged user's friends" })
-  @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
-  //@UseGuards(RolesGuard)
-  // @Roles("USER")
-  @Get("/:id/friends")
-  getAllFriendsByUser(@Param("id") id: number) {
-    return this.friendsService.getFriendsByUser(id);
-  }
 
-  @ApiOperation({ summary: "Get paged user's friends" })
+
+  @ApiOperation({ summary: "Get paged friends requests" })
   @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
   //@UseGuards(RolesGuard)
   // @Roles("USER")
@@ -110,6 +105,18 @@ export class UsersController {
                         @Query("limit") limit: number) 
   {
     return this.friendsService.getPagedRequestsByUser(id, limit, page);
+  }
+
+  @ApiOperation({ summary: "Get paged avoided friends requests" })
+  @ApiOkResponse({ type: "{rows:Friends[],count:number}" })
+  //@UseGuards(RolesGuard)
+  // @Roles("USER")
+  @Get("/:id/avoidedRequests")
+  getPagedAvoidedRequestsByUser(@Param("id") id: number,
+                        @Query("page") page: number,
+                        @Query("limit") limit: number) 
+  {
+    return this.friendsService.getPagedAvoidedRequestsByUser(id, limit, page);
   }
 
   @ApiOperation({ summary: "Get paged user's albums" })
