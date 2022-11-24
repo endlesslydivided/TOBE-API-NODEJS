@@ -20,10 +20,10 @@ export class RefreshTokenGuard extends AuthGuard('jwt-refresh')
             const cookie =request.header('cookie');
             if(cookie)
             {
-                const refreshTokenString = cookie.split("; ")[0].split('refreshToken=')[1];
+                const refreshTokenString = cookie.split("; ").filter(x => x.startsWith('refreshToken='))[0];
                 if(refreshTokenString)
                 {
-                    const refreshToken = JSON.parse(decodeURIComponent(refreshTokenString));
+                    const refreshToken = JSON.parse(decodeURIComponent(refreshTokenString.split('refreshToken=')[1]));
                     if (refreshToken)
                     {        
                         const decoded = await this.jwtService.verifyAsync(refreshToken.token,{algorithms:['RS256'] ,publicKey: process.env.REFRESH_TOKEN_PUBLIC});

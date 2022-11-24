@@ -9,6 +9,7 @@ import { User } from "src/users/users.model";
 import { Op } from "sequelize";
 import { Photo } from "src/photos/photos.model";
 import sequelize from "sequelize";
+import { FilterUserParams } from "src/requestFeatures/filterUser.params";
 
 @Injectable()
 export class FriendsService {
@@ -104,7 +105,7 @@ export class FriendsService {
     throw new NotFoundException("Друг не найден");
   }
 
-  async getPagedFriendsByUser(userId: number, limit: number = 10, page: number = 1) 
+  async getPagedFriendsByUser(userId: number,filters:FilterUserParams) 
   {
     const user = await this.usersService.getUserById(userId).catch((error) => 
     {
@@ -113,10 +114,10 @@ export class FriendsService {
 
     if(!user) throw new NotFoundException("Друзья не найдены: пользователь не найден");
 
-    const offset = page * limit - limit;
     return this.friendRepository.findAndCountAll(
       {
-        limit, offset,
+        limit: filters.limit, 
+        offset: filters.offset,
         where:
         {
           userId: 
@@ -149,17 +150,17 @@ export class FriendsService {
       });
   }
 
-  async getPagedRequestsByUser(userId: number, limit: number = 10, page: number = 1) 
+  async getPagedRequestsByUser(userId: number,filters:FilterUserParams) 
   {
     this.usersService.getUserById(userId).catch(() => 
     {
       throw new NotFoundException("Друзья не найдены: пользователь не найден");
     });
 
-    const offset = page * limit - limit;
     return this.friendRepository.findAndCountAll(
       {
-        limit, offset,
+        limit: filters.limit, 
+        offset: filters.offset,
         where:
           {
             userId: 
@@ -190,17 +191,17 @@ export class FriendsService {
       });
   }
 
-  async getPagedAvoidedRequestsByUser(userId: number, limit: number = 10, page: number = 1) 
+  async getPagedAvoidedRequestsByUser(userId: number,filters:FilterUserParams) 
   {
     this.usersService.getUserById(userId).catch(() => 
     {
       throw new NotFoundException("Друзья не найдены: пользователь не найден");
     });
 
-    const offset = page * limit - limit;
     return this.friendRepository.findAndCountAll(
       {
-        limit, offset,
+        limit: filters.limit, 
+        offset: filters.offset,
         where:
           {
             userId: 

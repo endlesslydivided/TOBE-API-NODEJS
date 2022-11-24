@@ -11,7 +11,9 @@ import { Photo } from "src/photos/photos.model";
 import { Sequelize } from "sequelize";
 import { Friend } from "src/friends/friends.model";
 import { Op } from "sequelize";
-import { FilterUserParams } from "./filterParams/filterUser.params";
+import sequelize from "sequelize";
+import { filter } from "rxjs";
+import { FilterUserParams } from "src/requestFeatures/filterUser.params";
 
 @Injectable()
 export class UsersService {
@@ -67,23 +69,37 @@ export class UsersService {
   });
   }
 
-  async getPagedUsers(limit: number = 10, page: number = 1,filters:FilterUserParams) 
+  async getPagedUsers(filters: FilterUserParams) 
   {
-    const offset = page * limit - limit;
-    return await this.userRepository.findAndCountAll({limit, offset,where:
-      {
-        [Op.or]:
-        {
-          sex:      { [Op.like]: '%' + filters.sex + '%' } ,
-          country:  { [Op.like]: '%' + filters.country + '%' } ,
-          city:     { [Op.like]: '%' + filters.city + '%' } ,
-          '$Photo.path$': filters.havePhoto ?  {[Op.or]:{[Op.eq]: null,[Op.ne]: null}} : {[Op.ne]: null}
-        }
-      },
-       order: [["createdAt", "DESC"]], include:
-    [
-      Photo,
-    ] });
+    const searchTerms = filters.search.toLowerCase().trim().split(' ');
+    const whereClause = 
+    {
+      [Op.and]: 
+      [
+          sequelize.where(sequelize.col('country'), { [Op.like]: `%${filters.country}%` } ),
+          sequelize.where(sequelize.col('sex'), { [Op.like]: `%${filters.sex}%` } ),
+          sequelize.where(sequelize.col('city'), { [Op.like]: `%${filters.city}%` } ),
+          sequelize.where(sequelize.col('photo.path'), filters.havePhoto === 'true' ?  {[Op.ne]: null} : {[Op.or]:{[Op.eq]: null,[Op.ne]: null}} ),
+          sequelize.where(
+            sequelize.fn('CONCAT',
+            sequelize.fn('LOWER', sequelize.col('firstName')),
+            sequelize.fn('LOWER', sequelize.col('lastName')))
+            , {[Op.like]: `%${filters.search.toLowerCase().replace(' ','').trim()}%`})
+      ],
+      [Op.or]: 
+      [
+        ...searchTerms.map(x =>sequelize.where(sequelize.fn('LOWER', sequelize.col('lastName')), {[Op.like]: `%${x}%`})),
+        ...searchTerms.map(x =>sequelize.where(sequelize.fn('LOWER', sequelize.col('firstName')), {[Op.like]: `%${x}%`})),          
+      ]
+    }
+    const users = await this.userRepository.findAndCountAll({
+        limit: filters.limit,
+        offset: filters.offset,
+        where: whereClause,
+        order: [[filters.orderBy,filters.orderDirection]], 
+        include:[{model:Photo},]
+      }).catch((error) =>console.log(error))
+    return  users;
   }
 
   async addRole(dto: AddRoleDto) {

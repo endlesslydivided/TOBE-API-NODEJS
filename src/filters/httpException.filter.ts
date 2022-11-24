@@ -11,11 +11,18 @@ export class HttpExceptionFilter implements BaseExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
     let message;
-    if(Object.hasOwnProperty('messages')&& Array.isArray(exception?.messages))
+    if(exception.hasOwnProperty('messages') && Array.isArray(exception?.messages))
     {
-        message = exception?.messages[0].message;
+      message = exception?.messages[0].message;
     }
-     message  = exception.message;
+    else if(exception.hasOwnProperty('response'))
+    {
+      message = Array.isArray(exception?.response?.message) ? exception?.response?.message[0]: exception?.response?.message;
+    }
+    else
+    {
+      message  = exception?.message;
+    }
 
     response
       .status(status)

@@ -34,7 +34,7 @@ import { Transaction } from "sequelize";
 import { Request } from "express";
 import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 import { UpdateUserDto } from "./dto/updateUser.dto";
-import { FilterUserParams } from "./filterParams/filterUser.params";
+import { FilterUserParams } from "src/requestFeatures/filterUser.params";
 
 @ApiTags("Users")
 @Controller("users")
@@ -64,11 +64,9 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   // @Roles("USER")
   @Get()
-  getPagedUsers(@Query("page") page: number,
-                @Query("limit") limit: number,
-                @Query() filters: FilterUserParams) 
+  getPagedUsers(@Query() filters: FilterUserParams) 
   {
-    return this.userService.getPagedUsers(limit, page,filters);
+    return this.userService.getPagedUsers(filters);
   }
 
   @ApiOperation({ summary: "Get user" })
@@ -87,10 +85,9 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   // @Roles("USER")
   @Get("/:id/friends")
-  getPagedFriendsByUser(@Param("id") id: number,
-                        @Query("page") page: number,
-                        @Query("limit") limit: number) {
-    return this.friendsService.getPagedFriendsByUser(id, limit, page);
+  getPagedFriendsByUser(@Param("id") id: number,@Query() filters: FilterUserParams) 
+  {
+    return this.friendsService.getPagedFriendsByUser(id,filters);
   }
 
 
@@ -100,11 +97,9 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   // @Roles("USER")
   @Get("/:id/requests")
-  getPagedFriendsRequestsByUser(@Param("id") id: number,
-                        @Query("page") page: number,
-                        @Query("limit") limit: number) 
+  getPagedFriendsRequestsByUser(@Param("id") id: number,@Query() filters: FilterUserParams) 
   {
-    return this.friendsService.getPagedRequestsByUser(id, limit, page);
+    return this.friendsService.getPagedRequestsByUser(id, filters);
   }
 
   @ApiOperation({ summary: "Get paged avoided friends requests" })
@@ -112,11 +107,9 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   // @Roles("USER")
   @Get("/:id/avoidedRequests")
-  getPagedAvoidedRequestsByUser(@Param("id") id: number,
-                        @Query("page") page: number,
-                        @Query("limit") limit: number) 
+  getPagedAvoidedRequestsByUser(@Param("id") id: number,@Query() filters: FilterUserParams) 
   {
-    return this.friendsService.getPagedAvoidedRequestsByUser(id, limit, page);
+    return this.friendsService.getPagedAvoidedRequestsByUser(id, filters);
   }
 
   @ApiOperation({ summary: "Get paged user's albums" })
