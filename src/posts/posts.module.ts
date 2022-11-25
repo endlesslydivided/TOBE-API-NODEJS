@@ -10,6 +10,7 @@ import { Post } from "./posts.model";
 import { AttachmentsModule } from "../attachments/attachments.module";
 import { UsersModule } from "../users/users.module";
 import { TagsModule } from "../tags/tags.module";
+import { NestjsFormDataModule } from "nestjs-form-data";
 
 @Module({
   providers: [PostsService],
@@ -19,8 +20,8 @@ import { TagsModule } from "../tags/tags.module";
       SequelizeModule.forFeature([Post, User, Attachment, Category, Tag]),
       forwardRef(() => AttachmentsModule),
       forwardRef(() => UsersModule),
-      forwardRef(() => TagsModule)
-
+      forwardRef(() => TagsModule),
+      NestjsFormDataModule
     ],
   exports:
     [

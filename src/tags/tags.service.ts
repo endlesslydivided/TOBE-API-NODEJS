@@ -14,7 +14,13 @@ export class TagsService {
   {
     return tags?.map(async (name) => 
     {
-        return await this.tagsRepository.create({ name, taggableType, taggableId }, {returning:true, transaction });
+        return await this.tagsRepository.findOrCreate(
+          {
+            where:{ name, taggableType, taggableId },
+            defaults:{name, taggableType, taggableId},
+            transaction
+          }
+        );
     });
   }
 

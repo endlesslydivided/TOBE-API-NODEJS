@@ -35,6 +35,7 @@ import { Request } from "express";
 import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 import { UpdateUserDto } from "./dto/updateUser.dto";
 import { FilterUserParams } from "src/requestFeatures/filterUser.params";
+import { FilterFeedParams } from "src/requestFeatures/filterFeedParams";
 
 @ApiTags("Users")
 @Controller("users")
@@ -119,7 +120,8 @@ export class UsersController {
   @Get("/:id/albums")
   getPagedAlbumsByUser(@Param("id") id: number,
                        @Query("page") page: number,
-                       @Query("limit") limit: number) {
+                       @Query("limit") limit: number) 
+  {
     return this.albumsService.getPagedAlbumsByUser(id, limit, page);
   }
 
@@ -150,10 +152,9 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   //@Roles("USER")
   @Get("/:id/feed")
-  getPagedFeedByUser(@Param("id") id: number,
-                     @Query("page") page: number,
-                     @Query("limit") limit: number) {
-    return this.postsService.getPagedPostByUserSubscriptions(id, limit, page);
+  getPagedFeedByUser(@Param("id") id: number, @Query()filters: FilterFeedParams) 
+  {
+    return this.postsService.getPagedPostByUserSubscriptions(id, filters);
   }
 
 

@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { AttachmentsService } from "../attachments/attachments.service";
 import { Post } from "./posts.model";
 import { InjectModel } from "@nestjs/sequelize";
@@ -8,6 +8,7 @@ import { UsersService } from "../users/users.service";
 import { Friend } from "../friends/friends.model";
 import { TagsService } from "../tags/tags.service";
 import { UpdatePostDto } from "./dto/updatePost.dto";
+import { FilterFeedParams } from "src/requestFeatures/filterFeedParams";
 
 @Injectable()
 export class PostsService {
@@ -20,21 +21,24 @@ export class PostsService {
               @InjectModel(Post) private postRepository: typeof Post) {
   }
 
-  async createPost(dto: CreatePostDto, files: any, transaction: Transaction) {
-    this.usersService.getUserById(dto.userId).catch((error) => {
-      throw new HttpException("Пост не создан: пользователь не найден", HttpStatus.NOT_FOUND);
+  async createPost(dto: CreatePostDto, transaction: Transaction) 
+  { 
+    this.usersService.getUserById(dto.userId).catch((error) => 
+    {
+      throw new InternalServerErrorException("Пост не создан.Ошибка на стороне сервера");
     });
 
     const post = await this.postRepository.create(dto, { transaction });
-    const { tags } = dto;
+    const { tags,files } = dto;
 
-    if (post) {
+    if (post) 
+    {
       const attachments = await this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, post.id, transaction).catch((error) => {
-        throw new HttpException("Пост не создан: ошибка добавления прикреплений", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new InternalServerErrorException("Пост не создан: ошибка добавления прикреплений");
       });
 
       const newTags = await this.tagsService.createTags(this.ANYABLE_TYPE, post.id, tags, transaction).catch((error) => {
-        throw new HttpException("Пост не создан: ошибка добавления тегов", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new InternalServerErrorException("Пост не создан: ошибка добавления тегов");
       });
 
       return post;
@@ -43,7 +47,8 @@ export class PostsService {
     throw new HttpException("Пост не создан", HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
-  async updatePost(id: number, dto: UpdatePostDto, files: any, transaction: Transaction) {
+  async updatePost(id: number, dto: UpdatePostDto, files: any, transaction: Transaction) 
+  {
     this.postRepository.findByPk(id).catch((error) => {
       throw new HttpException("Пост не найден", HttpStatus.NOT_FOUND);
     });
@@ -99,20 +104,21 @@ export class PostsService {
       });
   }
 
-  async getPagedPostByUserSubscriptions(userId: number, limit: number = 9, page: number = 0) {
+  async getPagedPostByUserSubscriptions(userId: number, filters:FilterFeedParams) 
+  {
     this.usersService.getUserById(userId).catch((error) => {
-      throw new HttpException("Посты не найдены: пользователь не найден", HttpStatus.NOT_FOUND);
+      throw new NotFoundException("Посты не найдены: пользователь не найден");
     });
 
-    const offset = page * limit - limit;
-    return this.postRepository.findAndCountAll(
+    return await this.postRepository.findAndCountAll(
       {
         include: { model: Friend, where: { userId } },
-        limit, offset,
+        limit: filters.limit,
+        offset: filters.offset,
         order: [["createdAt", "DESC"]]
-      }).then((result) => result)
+      })
       .catch((error) => {
-        throw new HttpException("Посты не найдены", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new InternalServerErrorException("Посты не найдены");
       });
   }
 

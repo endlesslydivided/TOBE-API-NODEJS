@@ -1,21 +1,26 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNumber, IsString, Length } from "class-validator";
+import { Transform } from "class-transformer";
+import { IsArray, IsNumber, IsOptional, IsString, Length } from "class-validator";
+import { IsFiles, MemoryStoredFile } from "nestjs-form-data";
 
 export class CreatePostDto {
 
   @ApiProperty({ example: "My first post", description: "Post title" })
   @IsString({ message: "Должно быть строкой" })
-  @Length(3, 75, { message: "Длина заголовка поста: от 3 до 75 символов" })
+  @Length(0, 100, { message: "Длина заголовка поста: от 1 до 100 символов" })
+  @IsOptional()
   readonly title: string;
 
   @ApiProperty({ example: "My first post description", description: "Post description" })
   @IsString({ message: "Должно быть строкой" })
   @Length(0, 255, { message: "Длина описания: до 255 символов" })
+  @IsOptional()
   readonly description: string;
 
   @ApiProperty({ example: "My first post content", description: "Post content" })
   @IsString({ message: "Должно быть строкой" })
-  @Length(1, 10000, { message: "Длина контента: от 1 до 10000 символов" })
+  @Length(0, 10000, { message: "Длина контента: до 10000 символов" })
+  @IsOptional()
   readonly content: string;
 
   @ApiProperty({ example: "0", description: "User's ID" })
@@ -24,9 +29,15 @@ export class CreatePostDto {
 
   @ApiProperty({ example: "0", description: "Category ID" })
   @IsNumber({}, { message: "Должно быть числом" })
+  @Transform(({ value }) => parseInt(value))
+  @IsOptional()
   readonly categoryId: number;
 
   @ApiProperty({ example: "['sport','goals','news']", description: "Tags" })
   @IsArray({ message: "Должно быть массивом строк" })
-  readonly tags: string[];
+  @IsOptional()
+  readonly tags: string[] = [];
+
+  @IsFiles()
+  readonly files: MemoryStoredFile[];
 }

@@ -8,6 +8,7 @@ import { Transaction } from "sequelize";
 import { UpdatePostDto } from "./dto/updatePost.dto";
 import { ApiCreatedResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Photo } from "../photos/photos.model";
+import { FormDataRequest } from "nestjs-form-data";
 
 @ApiTags("Posts")
 @Controller("posts")
@@ -18,13 +19,13 @@ export class PostsController {
 
   @ApiOperation({ summary: "Create post" })
   @ApiCreatedResponse({ type: Photo })
-  @UseInterceptors(TransactionInterceptor, FilesInterceptor("files"))
+  @UseInterceptors(TransactionInterceptor)
+  @FormDataRequest()
   @Post()
   createPost(@Body() dto: CreatePostDto,
-             @UploadedFiles() files,
              @TransactionParam() transaction: Transaction
   ) {
-    return this.postService.createPost(dto, files, transaction);
+    return this.postService.createPost(dto,transaction);
   }
 
   @ApiOperation({ summary: "Update post" })

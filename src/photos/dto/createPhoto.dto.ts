@@ -9,7 +9,6 @@ export class CreatePhotoDto {
   @ApiProperty({ example: "Hi!", description: "Photo description" })
   @IsString({ message: "Должно быть строкой" })
   @Length(0, 1000, { message: "Длина описания: до 255 символов" })
-  
   @IsOptional()
   readonly description: string = '';
 
