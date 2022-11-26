@@ -6,6 +6,7 @@ import { UsersModule } from "../users/users.module";
 import { AccessTokenStrategy } from "./strategy/accessToken.strategy";
 import { RefreshTokenStrategy } from "./strategy/refreshToken.strategy";
 import { MailModule } from "src/mail/mail.module";
+import { AlbumsModule } from "src/albums/albums.module";
 
 @Module({
   controllers: [AuthController],
@@ -14,6 +15,7 @@ import { MailModule } from "src/mail/mail.module";
     RefreshTokenStrategy],
   imports: [
     forwardRef(() => UsersModule),
+    forwardRef(() => AlbumsModule),
     JwtModule.register({})
   ],
   exports: [

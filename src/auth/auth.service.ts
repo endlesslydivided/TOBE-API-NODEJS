@@ -6,11 +6,14 @@ import { User } from "../users/users.model";
 import { AuthDto } from "./dto/Auth.dto";
 import * as bcrypt from 'bcrypt';
 import { MailService } from "src/mail/mail.service";
+import { AlbumsService } from "src/albums/albums.service";
+import { CreateAlbumDto } from "src/albums/dto/createAlbum.dto";
 
 @Injectable()
 export class AuthService {
 
   constructor(@Inject(forwardRef(() => UsersService)) private userService: UsersService,
+              @Inject(forwardRef(() => AlbumsService)) private albumsService: AlbumsService,
               @Inject(forwardRef(() => JwtService)) private jwtService: JwtService,
               private mailService: MailService) {
   }
@@ -65,6 +68,11 @@ export class AuthService {
     await this.updateRefreshToken(user, tokens.refreshToken);
     await this.mailService.sendUserConfirmation(user,emailToken);
 
+    const dto = new CreateAlbumDto();
+    dto.name = 'Фото профиля';
+    dto.userId = user.id;
+    const album = await this.albumsService.createAlbum(dto);
+    
     return tokens;
   }
 
