@@ -24,16 +24,16 @@ export class AttachmentsService {
   }
 
   async createAttachments(files: any, attachableType: string, attachableId: number, transaction: Transaction): Promise<any[]> {
-    return await files.map((file, order) => 
+    return files.map( async(file, order) => 
     {
-        this.fileService.createFile(file).then(async (path) => 
-        {
-          await this.attachmentRepository.create({ path, order, attachableId, attachableType }, { transaction });
-        })
+        const path =  await this.fileService.createFile(file);
+        const attachment = await this.attachmentRepository.create({ path, order, attachableId, attachableType }, { transaction })
         .catch(error => 
-        {
+        { 
           console.log(error);
         });
+        return attachment
+        
       }
     );
   }

@@ -9,6 +9,11 @@ import { Friend } from "../friends/friends.model";
 import { TagsService } from "../tags/tags.service";
 import { UpdatePostDto } from "./dto/updatePost.dto";
 import { FilterFeedParams } from "src/requestFeatures/filterFeedParams";
+import { User } from "src/users/users.model";
+import { Attachment } from "src/attachments/attachments.model";
+import { resolve } from "path";
+import { Op } from "sequelize";
+import { Photo } from "src/photos/photos.model";
 
 @Injectable()
 export class PostsService {
@@ -23,33 +28,44 @@ export class PostsService {
 
   async createPost(dto: CreatePostDto, transaction: Transaction) 
   { 
-    this.usersService.getUserById(dto.userId).catch((error) => 
+    const user = await this.usersService.getUserById(dto.userId).catch((error) => 
     {
       throw new InternalServerErrorException("Пост не создан.Ошибка на стороне сервера");
     });
 
-    const post = await this.postRepository.create(dto, { transaction });
+    if(!user) throw new NotFoundException("Пост не создан: пользователь не найден");
+
+    const post =  this.postRepository.create(dto, { transaction });
     const { tags,files } = dto;
 
-    if (post) 
+    return post.then(async (resultPost) =>
     {
-      const attachments = await this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, post.id, transaction).catch((error) => {
+      const attachmentsPromise = this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, resultPost.id, transaction).catch((error) =>
+      {
         throw new InternalServerErrorException("Пост не создан: ошибка добавления прикреплений");
-      });
+      });  
 
-      const newTags = await this.tagsService.createTags(this.ANYABLE_TYPE, post.id, tags, transaction).catch((error) => {
+      return attachmentsPromise.then(() =>  resultPost);                 
+    })
+    .then((resultPost) =>
+    {
+      const tagsPromise =  this.tagsService.createTags(this.ANYABLE_TYPE, resultPost?.id, tags, transaction).catch((error) =>
+      {
         throw new InternalServerErrorException("Пост не создан: ошибка добавления тегов");
       });
 
-      return post;
-    }
+      return tagsPromise.then(() =>  resultPost);                 
+    })
+    .catch((error) => 
+    {
+      throw new InternalServerErrorException("Пост не создан: ошибка на стороне сервера.");
+    });   
 
-    throw new HttpException("Пост не создан", HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   async updatePost(id: number, dto: UpdatePostDto, files: any, transaction: Transaction) 
   {
-    this.postRepository.findByPk(id).catch((error) => {
+    const findedPost = await this.postRepository.findByPk(id).catch((error) => {
       throw new HttpException("Пост не найден", HttpStatus.NOT_FOUND);
     });
     const { title, description, content, userId, categoryId, newTags, oldTags, attachmentsIds } = dto;
@@ -86,7 +102,7 @@ export class PostsService {
 
   async getPagedPostByUser(userId: number, limit: number = 9, page: number = 0) {
     this.usersService.getUserById(userId).catch((error) => {
-      throw new HttpException("Посты не найдены: пользователь не найден", HttpStatus.NOT_FOUND);
+      throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");
     });
 
     const offset = page * limit - limit;
@@ -100,19 +116,43 @@ export class PostsService {
         order: [["createdAt", "DESC"]]
       }).then((result) => result)
       .catch((error) => {
-        throw new HttpException("Посты не найдены", HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");
       });
   }
 
   async getPagedPostByUserSubscriptions(userId: number, filters:FilterFeedParams) 
   {
-    this.usersService.getUserById(userId).catch((error) => {
-      throw new NotFoundException("Посты не найдены: пользователь не найден");
+    const user = await this.usersService.getUserById(userId).catch((error) => {
+      throw new InternalServerErrorException("Посты не найдены.Ошибка на стороне сервера.");
     });
+
+    if(!user) throw new NotFoundException("Посты не найдены. Пользователь не найден");
+
+
+    const friendsIds = user.friends.map(x => x.friendId);
 
     return await this.postRepository.findAndCountAll(
       {
-        include: { model: Friend, where: { userId } },
+        include: 
+        [{
+          model: Attachment,
+        },
+        {
+          model: User,
+          include:
+          [
+            {model:Photo}
+          ]
+        }],
+        where: { 
+          userId: 
+          {[Op.or]:
+            {
+              [Op.in] : friendsIds,
+              [Op.eq] : userId
+            }
+            
+          } },
         limit: filters.limit,
         offset: filters.offset,
         order: [["createdAt", "DESC"]]

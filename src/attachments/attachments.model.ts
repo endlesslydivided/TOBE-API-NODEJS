@@ -17,7 +17,7 @@ export class Attachment extends Model<Attachment, AttachmentCreationAttribute> {
   id: number;
 
   @ApiProperty({ example: "./attachment/1.png", description: "Attachment path on server" })
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({ type: DataType.STRING, allowNull: false })
   path: string;
 
   @ApiProperty({ example: "0", description: "Order number of an attachment" })

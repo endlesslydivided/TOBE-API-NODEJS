@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { Attachment } from "../attachments/attachments.model";
 import { User } from "../users/users.model";
@@ -52,5 +52,8 @@ export class Post extends Model<Post, PostCreationAttribute> {
     constraints: true, onDelete: "set null", onUpdate: "cascade"
   })
   tags: Tag[];
+
+  @BelongsTo(() => User)
+  user: User;
 
 }

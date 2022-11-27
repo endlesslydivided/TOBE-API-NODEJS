@@ -26,10 +26,10 @@ export class PostsController {
              @TransactionParam() transaction: Transaction
   ) {
     return this.postService.createPost(dto,transaction);
-  }
-
+  }  
+ 
   @ApiOperation({ summary: "Update post" })
-  @ApiOkResponse()
+  @ApiOkResponse() 
   @UseInterceptors(TransactionInterceptor, FilesInterceptor("files"))
   @Put("/:id")
   updatePost(@Param("id") id: number,

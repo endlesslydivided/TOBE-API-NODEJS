@@ -25,6 +25,7 @@ export class CreatePostDto {
 
   @ApiProperty({ example: "0", description: "User's ID" })
   @IsNumber({}, { message: "Должно быть числом" })
+  @Transform(({ value }) => parseInt(value))
   readonly userId: number;
 
   @ApiProperty({ example: "0", description: "Category ID" })
@@ -39,5 +40,6 @@ export class CreatePostDto {
   readonly tags: string[] = [];
 
   @IsFiles()
-  readonly files: MemoryStoredFile[];
+  @IsOptional()
+  readonly files: MemoryStoredFile[] = [];
 }

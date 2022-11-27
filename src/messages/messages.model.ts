@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, Table } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../users/users.model";
 import { Dialog } from "../dialogs/dialogs.model";
@@ -42,4 +42,7 @@ export class Message extends Model<Message, MessageCreationAttribute> {
     constraints: true, onDelete: "set null", onUpdate: "cascade"
   })
   tags: Tag[];
+
+  @BelongsTo(() => User)
+  user: User;
 }
