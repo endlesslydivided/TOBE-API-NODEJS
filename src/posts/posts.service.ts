@@ -94,30 +94,42 @@ export class PostsService {
 
   async getPostsById(id: number) {
     const post = await this.postRepository.findByPk(id);
-    if (post) {
+
+    if (post) 
+    {
       return post;
     }
     throw new HttpException("Пост не найден", HttpStatus.NOT_FOUND);
   }
 
-  async getPagedPostByUser(userId: number, limit: number = 9, page: number = 0) {
-    this.usersService.getUserById(userId).catch((error) => {
-      throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");
+  async getPagedPostByUser(userId: number, filters:FilterFeedParams) 
+  {
+    const user = await this.usersService.getUserById(userId).catch((error) => {
+      throw new InternalServerErrorException("Посты не найдены.Ошибка на стороне сервера.");
     });
 
-    const offset = page * limit - limit;
-    return this.postRepository.findAndCountAll(
+    if(!user) throw new NotFoundException("Посты не найдены. Пользователь не найден");
+
+    return this.postRepository.findAndCountAll
+    (
       {
-        limit, offset,
-        where:
-          {
-            userId
-          },
+        include: 
+        [{
+          model: Attachment,
+        },
+        {
+          model: User,
+          include:
+          [
+            {model:Photo}
+          ]
+        }],
+        limit: filters.limit,
+        offset: filters.page *  filters.limit -  filters.limit,
+        where:{userId},
         order: [["createdAt", "DESC"]]
-      }).then((result) => result)
-      .catch((error) => {
-        throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");
-      });
+      }
+    ).catch(error => {throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");});
   }
 
   async getPagedPostByUserSubscriptions(userId: number, filters:FilterFeedParams) 
@@ -157,9 +169,7 @@ export class PostsService {
         offset: filters.page *  filters.limit -  filters.limit,
         order: [["createdAt", "DESC"]]
       })
-      .catch((error) => {
-        throw new InternalServerErrorException("Посты не найдены");
-      });
+      .catch((error) => {throw new InternalServerErrorException("Посты не найдены.Ошибка на стороне сервера.")});
   }
 
   async deletePost(id: number) {

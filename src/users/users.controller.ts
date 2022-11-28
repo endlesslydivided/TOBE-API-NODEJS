@@ -130,10 +130,8 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   //@Roles("USER")
   @Get("/:id/posts")
-  getPagedPostsByUser(@Param("id") id: number,
-                      @Query("page") page: number,
-                      @Query("limit") limit: number) {
-    return this.postsService.getPagedPostByUser(id, limit, page);
+  getPagedPostsByUser(@Param("id") id: number,@Query()filters: FilterFeedParams) {
+    return this.postsService.getPagedPostByUser(id,filters);
   }
 
   @ApiOperation({ summary: "Get paged user's posts" })
