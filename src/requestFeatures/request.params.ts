@@ -3,11 +3,6 @@ import { OrderItem } from "sequelize";
 export default class RequestParameters
 {
 
-    constructor()
-    {
-        this._offset = this.page *  this.limit -  this.limit
-    }
-
     private _maxLimit:number = 50;
     private _limit:number = 10;
     private _page:number = 1;

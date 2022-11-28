@@ -154,7 +154,7 @@ export class PostsService {
             
           } },
         limit: filters.limit,
-        offset: filters.offset,
+        offset: filters.page *  filters.limit -  filters.limit,
         order: [["createdAt", "DESC"]]
       })
       .catch((error) => {
