@@ -32,6 +32,7 @@ import { MulterModule } from "@nestjs/platform-express";
 import { MemoryStoredFile, NestjsFormDataModule } from "nestjs-form-data";
 import { ServeStaticModule } from "@nestjs/serve-static";
 import {join} from "path";
+import { ChatModule } from './chat/chat.module';
 
 @Module({
     controllers: [],
@@ -69,7 +70,8 @@ import {join} from "path";
       TagsModule,
       FilesModule,
       FriendsModule,
-      MailModule
+      MailModule,
+      ChatModule
     ]
   }
 )

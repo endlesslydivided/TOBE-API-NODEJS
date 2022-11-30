@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsArray, IsNumber, IsString, Length } from "class-validator";
+import { IsArray, IsNumber, IsOptional, IsString, Length } from "class-validator";
 
 export class CreateMessageDto {
 
@@ -18,5 +18,6 @@ export class CreateMessageDto {
 
   @ApiProperty({ example: "['sport','goals','news']", description: "Tags" })
   @IsArray({ message: "Должно быть массивом строк" })
-  readonly tags: string[];
+  @IsOptional()
+  readonly tags: string[] = [];
 }

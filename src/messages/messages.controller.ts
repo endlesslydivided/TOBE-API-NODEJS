@@ -17,14 +17,14 @@ export class MessagesController {
   }
 
 
-  @ApiOperation({ summary: "Message creation" })
-  @ApiCreatedResponse({ type: Message })
-  @UseInterceptors(FilesInterceptor("files"))
-  @UseInterceptors(TransactionInterceptor)
-  @Post()
-  createMessage(@Body() dto: CreateMessageDto, @UploadedFiles() files, @TransactionParam() transaction: Transaction) {
-    return this.messagesService.createMessage(dto, transaction, files);
-  }
+  // @ApiOperation({ summary: "Message creation" })
+  // @ApiCreatedResponse({ type: Message })
+  // @UseInterceptors(FilesInterceptor("files"))
+  // @UseInterceptors(TransactionInterceptor)
+  // @Post()
+  // createMessage(@Body() dto: CreateMessageDto, @UploadedFiles() files, @TransactionParam() transaction: Transaction) {
+  //   return this.messagesService.createMessage(dto, transaction, files);
+  // }
 
   @ApiOperation({ summary: "Message update" })
   @ApiOkResponse()

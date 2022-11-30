@@ -1,4 +1,4 @@
-import { forwardRef, HttpException, HttpStatus, Inject, Injectable } from "@nestjs/common";
+import { forwardRef, HttpException, HttpStatus, Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { UsersService } from "../users/users.service";
 import { Transaction } from "sequelize";
@@ -8,6 +8,7 @@ import { AttachmentsService } from "../attachments/attachments.service";
 import { Message } from "./messages.model";
 import { UpdateMessageDto } from "./dto/updateMessage.dto";
 import { TagsService } from "../tags/tags.service";
+import { FilterMessageParams } from "src/requestFeatures/filterMessageParams";
 
 @Injectable()
 export class MessagesService {
@@ -22,32 +23,50 @@ export class MessagesService {
     @Inject(forwardRef(() => TagsService)) private tagsService: TagsService) {
   }
 
-  async createMessage(dto: CreateMessageDto, transaction: Transaction, files: any) {
-    this.usersService.getUserById(dto.userId).catch((error) => {
-      throw new HttpException("Сообщение не оправлено: отправитель не найден", HttpStatus.NOT_FOUND);
+  async createMessage(dto: CreateMessageDto, transaction: Transaction)  //, files: any
+  { 
+    const user = await this.usersService.getUserById(dto.userId).catch((error) => 
+    {
+      throw new InternalServerErrorException("Сообщение не отправлено.Ошибка на стороне сервера");
     });
+
+    if(!user) throw new NotFoundException("Сообщение не отправлено: пользователь не найден");
+
+    const dialog = await this.dialogsService.getDialogById(dto.dialogId).catch((error) => 
+    {
+      throw new InternalServerErrorException("Сообщение не отправлено.Ошибка на стороне сервера");
+    });
+
+    if(!dialog) throw new NotFoundException("Сообщение не отправлено: диалог не найден");
+
+
     const { text, dialogId, userId, tags } = dto;
-    const message = await this.messageRepository.create({ text, dialogId, userId }, { transaction });
+    const message =  this.messageRepository.create({ text, dialogId, userId }, { transaction, returning:true });
 
-    if (message) {
-      const attachments = await this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, message.id, transaction).catch((error) => {
-        throw new HttpException("Сообщение не оправлено: ошибка добавления прикреплений", HttpStatus.INTERNAL_SERVER_ERROR);
+    return message
+    // .then(async (resultMessage) =>
+    // {
+    //   const attachmentsPromise = this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, resultMessage.id, transaction).catch((error) =>
+    //   {
+    //     throw new InternalServerErrorException("Сообщение не отправлено: ошибка добавления прикреплений");
+    //   });  
+
+    //   return attachmentsPromise.then(() =>  resultMessage);                 
+    // })
+    .then((resultMessage) =>
+    {
+      const tagsPromise =  this.tagsService.createTags(this.ANYABLE_TYPE, resultMessage?.id, tags, transaction).catch((error) =>
+      {
+        throw new InternalServerErrorException("Сообщение не отправлено: ошибка добавления тегов");
       });
 
-      const newTags = await this.tagsService.createTags(this.ANYABLE_TYPE, message.id, tags, transaction).catch((error) => {
-        throw new HttpException("Сообщение не оправлено: ошибка добавления тегов", HttpStatus.INTERNAL_SERVER_ERROR);
-      });
-
-      return message;
-    }
-    throw new HttpException("Сообщение не оправлено: ошибка создания экземпляра сообщений", HttpStatus.INTERNAL_SERVER_ERROR);
-
+      return tagsPromise.then(() =>  resultMessage);                 
+    })
+    .catch((error) => 
+    {
+      throw new InternalServerErrorException("Сообщение не отправлено: ошибка на стороне сервера.");
+    });   
   }
-
-  //TODO Изменить контроллер message,post,dialog,photos
-  //TODO Изменить сервис photos
-  //TODO Изменить контроллеры на добавление кодов сообщений
-  //TODO Добавить аттрибуты валидации к моделям и DTO :
 
   async updateMessage(id: number, dto: UpdateMessageDto, transaction: Transaction, files: any) {
     this.messageRepository.findByPk(id).catch((error) => {
@@ -81,26 +100,27 @@ export class MessagesService {
     throw new HttpException("Сообщения не найдены: диалог не существует", HttpStatus.NOT_FOUND);
   }
 
-  async getPagedMessageByDialog(dialogId: number, limit: number = 9, page: number = 0) {
-    const dialog = await this.dialogsService.getDialogById(dialogId);
-    const offset = page * limit - limit;
-    if (dialog) {
-      return await this.messageRepository.findAndCountAll({
-        where: { dialogId },
-        limit,
-        offset,
-        order: [["createdAt", "DESC"]]
-      });
+  async getPagedMessagesByDialog(dialogId: number, filters:FilterMessageParams) {
+    
+    const dialog = await this.dialogsService.getDialogById(dialogId).catch((error) => 
+    {
+      throw new InternalServerErrorException("Сообщения не найдены.Ошибка на стороне сервера");
+    });
 
-    }
-    throw new HttpException("Сообщения не найдены: диалог не существует", HttpStatus.NOT_FOUND);
+    if(!dialog) throw new NotFoundException("Сообщения не найдены: диалог не найден");
+    
+    return await this.messageRepository.findAndCountAll({
+      where: { dialogId },
+      limit: filters.limit,
+      offset: filters.page *  filters.limit -  filters.limit,
+      order: [["createdAt", "DESC"]]
+    });
   }
 
-  async deleteMessage(id: number) {
+  async deleteMessage(id: number) 
+  {
     const message = await this.messageRepository.findByPk(id);
-    if (message) {
-      return await this.messageRepository.destroy({ where: { id } });
-    }
-    throw new HttpException("Сообщения не найдено", HttpStatus.NOT_FOUND);
+    if(!message) throw new NotFoundException("Сообщение не найдено: диалог не найден");
+    return await this.messageRepository.destroy({ where: { id } });
   }
 }

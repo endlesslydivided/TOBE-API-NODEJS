@@ -57,12 +57,12 @@ export class DialogsController {
     return this.dialogsService.deleteDialog(id);
   }
 
-  @ApiOperation({ summary: "Get paged dialog' messages" })
-  @ApiOkResponse({ type: "{rows:Message[],count:number}" })
-  @Get("/:id/messages")
-  getPagedMessageByDialog(@Param("id") dialogId: number,
-                          @Query("limit") limit: number,
-                          @Query("page") page: number) {
-    return this.messagesService.getPagedMessageByDialog(dialogId, limit, page);
-  }
+  // @ApiOperation({ summary: "Get paged dialog' messages" })
+  // @ApiOkResponse({ type: "{rows:Message[],count:number}" })
+  // @Get("/:id/messages")
+  // getPagedMessageByDialog(@Param("id") dialogId: number,
+  //                         @Query("limit") limit: number,
+  //                         @Query("page") page: number) {
+  //   return this.messagesService.getPagedMessageByDialog(dialogId, limit, page);
+  // }
 }

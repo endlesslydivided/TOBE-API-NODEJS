@@ -17,6 +17,6 @@ export class CreateDialogDto {
   readonly creatorId: number;
 
   @ApiProperty({ example: "[0,1,2,3]", description: "User's IDs" })
-  @IsArray({ message: "Должно быть числом" })
+  @IsArray({ message: "Должно быть массивом чисел" })
   readonly usersId: number[];
 }

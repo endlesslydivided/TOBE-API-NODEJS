@@ -36,6 +36,7 @@ import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 import { UpdateUserDto } from "./dto/updateUser.dto";
 import { FilterUserParams } from "src/requestFeatures/filterUser.params";
 import { FilterFeedParams } from "src/requestFeatures/filterFeedParams";
+import { FilterDialogParams } from "src/requestFeatures/filterDialogParams";
 
 @ApiTags("Users")
 @Controller("users")
@@ -139,10 +140,8 @@ export class UsersController {
   //@UseGuards(RolesGuard)
   //@Roles("USER")
   @Get("/:id/dialogs")
-  getPagedDialogsByUser(@Param("id") id: number,
-                        @Query("page") page: number,
-                        @Query("limit") limit: number) {
-    return this.dialogsService.getPagedDialogsByUser(id, limit, page);
+  getPagedDialogsByUser(@Param("id") id: number,@Query()filters: FilterDialogParams) {
+    return this.dialogsService.getPagedDialogsByUser(id,filters);
   }
 
   @ApiOperation({ summary: "Get paged user's subscriptions posts" })
