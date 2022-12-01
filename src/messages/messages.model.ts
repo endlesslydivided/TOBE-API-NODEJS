@@ -18,7 +18,7 @@ export class Message extends Model<Message, MessageCreationAttribute> {
   id: number;
 
   @ApiProperty({ example: "Hi!", description: "Message text" })
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   text: string;
 
   @ApiProperty({ example: "0", description: "ID of message dialog" })

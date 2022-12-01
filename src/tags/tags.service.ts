@@ -10,18 +10,24 @@ export class TagsService {
     @InjectModel(Tag) private tagsRepository: typeof Tag) {
   }
 
-  async createTags(taggableType: string, taggableId: number, tags: string[], transaction: Transaction) 
+  async createTags(taggableType: string, taggableId: number, tags: string[] = [], transaction: Transaction) 
   {
-    return tags?.map(async (name) => 
+    return tags.map( async(name) => 
     {
-        return await this.tagsRepository.findOrCreate(
-          {
-            where:{ name, taggableType, taggableId },
-            defaults:{name, taggableType, taggableId},
-            transaction
-          }
-        );
-    });
+      const tag = await this.tagsRepository.findOrCreate(
+        {
+          where:{ name, taggableType, taggableId },
+          defaults:{name, taggableType, taggableId},
+          transaction
+        }
+      ).catch(error => 
+        { 
+          console.log(error);
+        });
+      return tag
+        
+    }
+    );   
   }
 
   async updateTags(tagsIds: number[], newTags: string[], taggableType: string, taggableId: number, transaction: Transaction): Promise<any[]> {

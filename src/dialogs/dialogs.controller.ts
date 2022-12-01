@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   forwardRef,
   Get,
   Inject,
@@ -52,9 +53,19 @@ export class DialogsController {
   @ApiNoContentResponse()
   // @UseGuards(RolesGuard)
   // @Roles("ADMIN")
-  @Get("/:id")
+  @Delete("/:id")
   deleteDialog(@Param("id") id: number) {
     return this.dialogsService.deleteDialog(id);
+  }
+
+  
+  @ApiOperation({ summary: "Get a dialog" })
+  @ApiNoContentResponse()
+  // @UseGuards(RolesGuard)
+  // @Roles("ADMIN")
+  @Get("/:id")
+  getOneDialog(@Param("id") id: number) {
+    return this.dialogsService.getDialogById(id);
   }
 
   // @ApiOperation({ summary: "Get paged dialog' messages" })

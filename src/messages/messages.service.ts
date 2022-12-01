@@ -9,6 +9,9 @@ import { Message } from "./messages.model";
 import { UpdateMessageDto } from "./dto/updateMessage.dto";
 import { TagsService } from "../tags/tags.service";
 import { FilterMessageParams } from "src/requestFeatures/filterMessageParams";
+import { Dialog } from "src/dialogs/dialogs.model";
+import { User } from "src/users/users.model";
+import { Photo } from "src/photos/photos.model";
 
 @Injectable()
 export class MessagesService {
@@ -41,19 +44,8 @@ export class MessagesService {
 
 
     const { text, dialogId, userId, tags } = dto;
-    const message =  this.messageRepository.create({ text, dialogId, userId }, { transaction, returning:true });
-
-    return message
-    // .then(async (resultMessage) =>
-    // {
-    //   const attachmentsPromise = this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, resultMessage.id, transaction).catch((error) =>
-    //   {
-    //     throw new InternalServerErrorException("Сообщение не отправлено: ошибка добавления прикреплений");
-    //   });  
-
-    //   return attachmentsPromise.then(() =>  resultMessage);                 
-    // })
-    .then((resultMessage) =>
+    const message =  this.messageRepository.create({ text, dialogId, userId }, { transaction, returning:true});
+    return message.then(async (resultMessage) =>
     {
       const tagsPromise =  this.tagsService.createTags(this.ANYABLE_TYPE, resultMessage?.id, tags, transaction).catch((error) =>
       {
@@ -65,7 +57,17 @@ export class MessagesService {
     .catch((error) => 
     {
       throw new InternalServerErrorException("Сообщение не отправлено: ошибка на стороне сервера.");
-    });   
+    });
+    
+        // .then(async (resultMessage) =>
+    // {
+    //   const attachmentsPromise = this.attachmentsService.createAttachments(files, this.ANYABLE_TYPE, resultMessage.id, transaction).catch((error) =>
+    //   {
+    //     throw new InternalServerErrorException("Сообщение не отправлено: ошибка добавления прикреплений");
+    //   });  
+
+    //   return attachmentsPromise.then(() =>  resultMessage);                 
+    // })
   }
 
   async updateMessage(id: number, dto: UpdateMessageDto, transaction: Transaction, files: any) {
@@ -111,10 +113,16 @@ export class MessagesService {
     
     return await this.messageRepository.findAndCountAll({
       where: { dialogId },
+      include:[{model: User,include:[{model:Photo}]}],
       limit: filters.limit,
       offset: filters.page *  filters.limit -  filters.limit,
       order: [["createdAt", "DESC"]]
     });
+  }
+
+  async getOneMessage(id: number) 
+  { 
+    return await this.messageRepository.findByPk(id,{include:[{model: User}]});
   }
 
   async deleteMessage(id: number) 

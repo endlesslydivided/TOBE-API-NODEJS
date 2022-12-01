@@ -11,6 +11,7 @@ import { TransactionParam } from 'src/decorators/transactionParam.decorator';
 import { Transaction } from 'sequelize';
 import { AccessTokenGuard } from "../auth/guards/accessToken.guard";
 import { Auth, AuthUser } from 'src/auth/decorators/auth.decorator';
+import { UsersService } from 'src/users/users.service';
 
 enum ChatClientEvent 
 {
@@ -34,6 +35,7 @@ enum ChatServerEvent
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect 
 {
   constructor( @Inject(forwardRef(() => MessagesService)) private messagesService: MessagesService,
+  @Inject(forwardRef(() => UsersService)) private userService: UsersService,
   @Inject(forwardRef(() => DialogsService)) private dialogsService: DialogsService)
   {
 
@@ -46,13 +48,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   
   @SubscribeMessage(ChatServerEvent.SendMessage)
   @UseInterceptors(TransactionInterceptor)
-  handleSendMessage(@MessageBody() body,  @TransactionParam() transaction: Transaction): void 
+  handleSendMessage(@MessageBody() body,  @TransactionParam() transaction: Transaction) 
   {
-    const message =  this.messagesService.createMessage(body.dto,transaction);
-    message.then((message) =>
+    return this.messagesService.createMessage(body.dto,transaction).then(async (message) =>
     {
-      this.server.to(body.toUserId.toString()).emit(ChatClientEvent.ReceiveMessage, message);
-    })
+      const userData = await this.userService.getUserById(message.userId);
+      this.server.to(body.auth.dialogId.toString() + body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
+      this.server.to(body.auth.dialogId.toString() + body.toUserId.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
+
+    });
+    
   }
 
   @SubscribeMessage(ChatServerEvent.GetDialogMessages)
@@ -62,7 +67,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const messages = this.messagesService.getPagedMessagesByDialog(body.dialogId,body.filters);
     messages.then((messages) =>
     {
-      this.server.to(body.toUserId.toString()).emit(ChatClientEvent.ReceiveMessage, messages);
+      this.server.to(body.auth.dialogId.toString() + body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, messages);
     })
   }
 
@@ -91,8 +96,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   handleConnection(client: Socket,  @Auth() user: AuthUser,...args: any[]) 
   {
     const auth = client.handshake.auth;
-    client.join(auth.userId);
-    client['userId'] = auth.userId;
+    
+    if(auth.dialogId && auth.id)    client.join(auth.dialogId.toString() + auth.id.toString());
+
+    client['userId'] = auth.id;
     this.logger.log(`Client connected: ${client.id}`);
   }
 }

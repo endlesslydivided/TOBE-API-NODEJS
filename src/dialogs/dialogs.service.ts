@@ -94,7 +94,7 @@ export class DialogsService {
 
   async getDialogById(id: number) 
   {
-    const dialog = await this.dialogRepository.findByPk(id);
+    const dialog = await this.dialogRepository.findByPk(id,{include: {model: User, attributes:['id','firstName','lastName'],include:[Photo]}});
     if(!dialog) throw new NotFoundException("Диалог не найден");
     return dialog;
   }

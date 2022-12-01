@@ -28,7 +28,7 @@ export class Post extends Model<Post, PostCreationAttribute> {
   description: string;
 
   @ApiProperty({ example: "My first post content", description: "Post content" })
-  @Column({ type: DataType.STRING, allowNull: false })
+  @Column({ type: DataType.TEXT, allowNull: false })
   content: string;
 
   @ApiProperty({ example: "0", description: "ID of post category" })
