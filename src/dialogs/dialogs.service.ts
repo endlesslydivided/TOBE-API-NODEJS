@@ -80,7 +80,7 @@ export class DialogsService {
             { model: User, where: {id: {[Op.ne] : userId} }, attributes: ["createdAt","firstName","lastName"],
               include:[{model:Photo}] },
             {
-              model: Message, attributes: ["createdAt", "text", "userId"], limit: 1
+              model: Message, attributes: ["createdAt", "text", "userId"],order:[["createdAt", "DESC"]], limit: 1
             }
           ],
         limit: filters.limit,

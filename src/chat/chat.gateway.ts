@@ -53,9 +53,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return this.messagesService.createMessage(body.dto,transaction).then(async (message) =>
     {
       const userData = await this.userService.getUserById(message.userId);
-      this.server.to(body.auth.dialogId.toString() + body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
-      this.server.to(body.auth.dialogId.toString() + body.toUserId.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
-
+      this.server.to(body.dto.dialogId.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
     });
     
   }
@@ -67,7 +65,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const messages = this.messagesService.getPagedMessagesByDialog(body.dialogId,body.filters);
     messages.then((messages) =>
     {
-      this.server.to(body.auth.dialogId.toString() + body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, messages);
+      this.server.to(body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, messages);
     })
   }
 
@@ -78,7 +76,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const dialogs = this.dialogsService.getPagedDialogsByUser(body.userId,body.filters);
     dialogs.then((dialogs) =>
     {
-      this.server.to(body.userId.toString()).emit(ChatClientEvent.ReceiveDialogs, dialogs);
+      this.server.to(body.auth.id.toString()).emit(ChatClientEvent.ReceiveDialogs, dialogs);
     })
   }
 
@@ -98,8 +96,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const auth = client.handshake.auth;
     
     if(auth.dialogId && auth.id)    client.join(auth.dialogId.toString() + auth.id.toString());
+    if(auth.dialogId)      client.join(auth.dialogId.toString())
+    if(auth.id)      client.join(auth.id.toString())
 
-    client['userId'] = auth.id;
     this.logger.log(`Client connected: ${client.id}`);
   }
 }

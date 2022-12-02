@@ -12,6 +12,8 @@ import { FilterMessageParams } from "src/requestFeatures/filterMessageParams";
 import { Dialog } from "src/dialogs/dialogs.model";
 import { User } from "src/users/users.model";
 import { Photo } from "src/photos/photos.model";
+import { Op } from "sequelize";
+import sequelize from "sequelize";
 
 @Injectable()
 export class MessagesService {
@@ -110,14 +112,29 @@ export class MessagesService {
     });
 
     if(!dialog) throw new NotFoundException("Сообщения не найдены: диалог не найден");
-    
-    return await this.messageRepository.findAndCountAll({
-      where: { dialogId },
+
+    let whereClause = 
+    {
+      [Op.and]:
+      [
+        sequelize.where(sequelize.col('dialogId'),{[Op.eq] : dialogId })
+      ]
+    }
+
+    if(filters.lastDate)
+    {
+      whereClause[Op.and].push(sequelize.where(sequelize.col(`"Message"."createdAt"`),{[Op.lt] : filters.lastDate }));
+    }
+    const messages = await this.messageRepository.findAndCountAll({
+      where: whereClause,
       include:[{model: User,include:[{model:Photo}]}],
       limit: filters.limit,
-      offset: filters.page *  filters.limit -  filters.limit,
       order: [["createdAt", "DESC"]]
+    }).catch((error) =>
+    {
+      throw new InternalServerErrorException("Сообщения не найдены.Ошибка на стороне сервера");
     });
+    return messages;
   }
 
   async getOneMessage(id: number) 
