@@ -1,4 +1,4 @@
-import { Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
+import { BelongsTo, BelongsToMany, Column, DataType, ForeignKey, Model, Table } from "sequelize-typescript";
 import { User } from "../users/users.model";
 import { Dialog } from "./dialogs.model";
 
@@ -14,4 +14,10 @@ export class UserDialog extends Model<UserDialog> {
   @ForeignKey(() => Dialog)
   @Column({ type: DataType.INTEGER })
   dialogId: number;
+
+  @BelongsTo(() => User)
+  user: User
+
+  @BelongsTo(() => Dialog)
+  dialog: Dialog
 }

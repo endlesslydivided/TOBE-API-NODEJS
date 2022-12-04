@@ -142,4 +142,7 @@ export class User extends Model<User, UserCreationAttribute> {
   })
   friends: Friend[];
 
+  @HasMany(() => UserDialog)
+  userDialog: UserDialog[]
+
 }

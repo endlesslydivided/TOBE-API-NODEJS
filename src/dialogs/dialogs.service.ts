@@ -31,18 +31,26 @@ export class DialogsService {
 
     const { name, isChat, creatorId, usersId } = dto;
     
-    const dialog = await this.dialogRepository.findOrCreate(
-      {where:{ name, isChat, creatorId },defaults:{ name, isChat, creatorId },transaction,returning:true});
-    
-    if(dialog[1])
+    const dialogsUsersIds = [...usersId,creatorId];
+    const usersDialogs = await this.userDialogRepository.findAll({where:{userId: {[Op.in]: dialogsUsersIds}}});
+    let dialogResult = {};
+    if(usersDialogs.length === dialogsUsersIds.length+ 1)
     {
-      await dialog[0].$set('users',[...usersId,creatorId],{transaction}).catch((error) => {
+      let dialogId = usersDialogs[0].id;
+      dialogResult['dialog'] = await this.dialogRepository.findOne({where:{id:dialogId}});
+      dialogResult['created'] = false;
+    }
+    else
+    {
+      dialogResult['dialog'] = await this.dialogRepository.create({name, isChat, creatorId});     
+      await dialogResult['dialog'].$set('users',[...usersId,creatorId],{transaction}).catch((error) => {
         throw new InternalServerErrorException("Диалог не создан.");
       });
+      dialogResult['created'] = true;
     }
-  
+
    
-    return dialog[0];
+    return dialogResult;
   }
 
   async updateDialog(id: number, dto: UpdateDialogDto) 
@@ -73,16 +81,22 @@ export class DialogsService {
 
     if(!user) throw new NotFoundException("Диалоги не найдены: пользователь не найден");
 
-    return this.dialogRepository.findAndCountAll(
+    const userDialogsId = (await this.userDialogRepository.findAll({where: {userId},attributes:["dialogId"]})).map(x=> x.dialogId)
+    const dialogs = await this.dialogRepository.findAndCountAll(
       {
         include:
           [
-            { model: User, where: {id: {[Op.ne] : userId} }, attributes: ["createdAt","firstName","lastName"],
-              include:[{model:Photo}] },
+            { 
+              model:User,attributes:["id","createdAt","firstName","lastName"],where:{id: {[Op.ne]: userId}},include:[{model:Photo}]
+            },
             {
               model: Message, attributes: ["createdAt", "text", "userId"],order:[["createdAt", "DESC"]], limit: 1
             }
           ],
+        where:
+        {
+          id: {[Op.in]: userDialogsId}
+        },
         limit: filters.limit,
         offset: filters.page *  filters.limit -  filters.limit,
         order: [["createdAt", "DESC"]]
@@ -90,6 +104,7 @@ export class DialogsService {
       .catch((error) => {
         throw new InternalServerErrorException("Диалоги не найдены");
       });
+    return dialogs;
   }
 
   async getDialogById(id: number) 

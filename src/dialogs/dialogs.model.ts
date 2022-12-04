@@ -33,6 +33,9 @@ export class Dialog extends Model<Dialog, DialogCreationAttribute> {
   @BelongsToMany(() => User, () => UserDialog)
   users: User[];
 
+  @HasMany(() => UserDialog)
+  userDialog: UserDialog[]
+
   @HasMany(() => Message, "dialogId")
   messages: Message[];
 }

@@ -95,9 +95,10 @@ export class UsersService {
     const users = await this.userRepository.findAndCountAll({
         limit: filters.limit,
         offset: filters.offset,
+        subQuery: false,
         where: whereClause,
         order: [[filters.orderBy,filters.orderDirection]], 
-        include:[{model:Photo},]
+        include:[{model:Role,where:{name:{[Op.ne]: "ADMIN"}}},{model:Photo}]
       }).catch((error) =>console.log(error))
     return  users;
   }
