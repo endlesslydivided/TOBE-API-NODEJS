@@ -30,7 +30,7 @@ export class DialogsService {
     if(!user) throw new NotFoundException("Сообщение не отправлено: пользователь не найден");
 
     const { name, isChat, creatorId, usersId } = dto;
-    
+     
     const dialogsUsersIds = [...usersId,creatorId];
     const usersDialogs = await this.userDialogRepository.findAll({where:{userId: {[Op.in]: dialogsUsersIds}}});
     let dialogResult = {};

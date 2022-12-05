@@ -120,17 +120,18 @@ export class FriendsService {
         offset: filters.offset,
         where:
         {
-          userId: 
-          {
-              [Op.in]: Sequelize.literal(`(
-              SELECT "Friend"."userId"
-              FROM "friends" AS "Friend"
-              WHERE
-              "Friend"."friendId" = ${userId}
-                  AND
-              "Friend"."isRejected" is false
-          )`)
-          }
+          friendId:  userId,
+          isRejected: false 
+          // {
+          //     [Op.in]: Sequelize.literal(`(
+          //     SELECT "Friend"."userId"
+          //     FROM "friends" AS "Friend"
+          //     WHERE
+          //     "Friend"."friendId" = ${userId}
+          //         AND
+          //     "Friend"."isRejected" is false
+          // )`)
+          // }
           
         },
         include:
@@ -157,28 +158,30 @@ export class FriendsService {
       throw new NotFoundException("Друзья не найдены: пользователь не найден");
     });
 
-    return this.friendRepository.findAndCountAll(
+    const requests = await  this.friendRepository.findAndCountAll(
       {
         limit: filters.limit, 
         offset: filters.offset,
         where:
           {
-            userId: 
-          {
-              [Op.in]: Sequelize.literal(`(
-              SELECT "Friend"."userId"
-              FROM "friends" AS "Friend"
-              WHERE
-              "Friend"."friendId" = ${userId}
-                  AND
-              "Friend"."isRejected" is null
-          )`)
-          }
+            friendId:  userId,
+            isRejected: null
+          // {
+          //     [Op.in]: Sequelize.literal(`(
+          //     SELECT "Friend"."friendId"
+          //     FROM "friends" AS "Friend"
+          //     WHERE
+          //     "Friend"."friendId" = ${userId}
+          //         AND
+          //     "Friend"."isRejected" is null
+          // )`)
+          // }
           },
         include:
         [{
           model: User,
           attributes: ['id','firstName','lastName','email','city','country','sex','emailConfirmed','phoneNumber','mainPhoto'],
+          //where: sequelize.where(sequelize.col('user.id'),{[Op.eq] : sequelize.col('Friend.friendId') }),
           include:
           [
             {model:Photo}
@@ -189,6 +192,8 @@ export class FriendsService {
       .catch((error) => {
         throw new InternalServerErrorException("Заявки не найдены");
       });
+
+    return requests;
   }
 
   async getPagedAvoidedRequestsByUser(userId: number,filters:FilterUserParams) 
@@ -204,17 +209,18 @@ export class FriendsService {
         offset: filters.offset,
         where:
           {
-            userId: 
-          {
-              [Op.in]: Sequelize.literal(`(
-              SELECT "Friend"."userId"
-              FROM "friends" AS "Friend"
-              WHERE
-              "Friend"."friendId" = ${userId}
-                  AND
-              "Friend"."isRejected" = true
-          )`)
-          }
+            friendId:  userId,
+            isRejected: true          
+          // {
+          //     [Op.in]: Sequelize.literal(`(
+          //     SELECT "Friend"."userId"
+          //     FROM "friends" AS "Friend"
+          //     WHERE
+          //     "Friend"."friendId" = ${userId}
+          //         AND
+          //     "Friend"."isRejected" = true
+          // )`)
+          // }
           },
         include:
         [{

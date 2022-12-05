@@ -93,13 +93,23 @@ export class PostsService {
   }
 
   async getPostsById(id: number) {
-    const post = await this.postRepository.findByPk(id);
+    const post = await this.postRepository.findByPk(id,
+      {
+        include:
+        [
+          {model: Attachment},
+          {model: User,include:[{model:Photo}]}
+        ]
+      }).catch((error) => 
+      {
+        throw new InternalServerErrorException("Пост не найден. Ошибка на стороне сервера");
+      });
 
     if (post) 
     {
       return post;
     }
-    throw new HttpException("Пост не найден", HttpStatus.NOT_FOUND);
+    throw new NotFoundException("Пост не найден");
   }
 
   async getPagedPostByUser(userId: number, filters:FilterFeedParams) 
@@ -142,8 +152,7 @@ export class PostsService {
 
 
     const friendsIds = user.friends.map(x => x.friendId);
-
-    return await this.postRepository.findAndCountAll(
+    const feed = await this.postRepository.findAndCountAll(
       {
         include: 
         [{
@@ -170,6 +179,7 @@ export class PostsService {
         order: [["createdAt", "DESC"]]
       })
       .catch((error) => {throw new InternalServerErrorException("Посты не найдены.Ошибка на стороне сервера.")});
+    return feed;
   }
 
   async deletePost(id: number) {
