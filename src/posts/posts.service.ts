@@ -151,7 +151,7 @@ export class PostsService {
         include:[{model: Attachment},{model: User,include: [{model:Photo}]}],
         limit: filters.limit,
         offset: filters.page *  filters.limit -  filters.limit,
-        order: [["createdAt", "DESC"]]
+        order: [[filters.orderBy, filters.orderDirection]]
       }
     ).catch(error => {throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");});
 

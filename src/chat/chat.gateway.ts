@@ -54,6 +54,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     {
       const userData = await this.userService.getUserById(message.userId);
       this.server.to(body.dto.dialogId.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
+
     });
     
   }

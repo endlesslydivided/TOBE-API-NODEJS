@@ -32,11 +32,17 @@ export class DialogsService {
     const { name, isChat, creatorId, usersId } = dto;
      
     const dialogsUsersIds = [...usersId,creatorId];
-    const usersDialogs = await this.userDialogRepository.findAll({where:{userId: {[Op.in]: dialogsUsersIds}}});
+    const usersDialogs = await this.userDialogRepository.findAll(
+      {where:{userId: {[Op.in]: dialogsUsersIds}}}
+    );
+    const usersIdsDialogs = usersDialogs.filter(x => x.userId === dialogsUsersIds[0]);
+    const creatorIdsDialogs = usersDialogs.filter(x => x.userId === creatorId);
+    const commonDialogs = usersIdsDialogs.filter(x => creatorIdsDialogs.some(y => y.dialogId === x.dialogId));
+
     let dialogResult = {};
-    if(usersDialogs.length === dialogsUsersIds.length+ 1)
+    if(commonDialogs.length === 1)
     {
-      let dialogId = usersDialogs[0].id;
+      let dialogId = commonDialogs[0].dialogId;
       dialogResult['dialog'] = await this.dialogRepository.findOne({where:{id:dialogId}});
       dialogResult['created'] = false;
     }
