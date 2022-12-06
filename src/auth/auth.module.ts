@@ -1,4 +1,4 @@
-import { forwardRef, Module } from "@nestjs/common";
+import { forwardRef, Global, Module } from "@nestjs/common";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { JwtModule } from "@nestjs/jwt";
@@ -8,6 +8,7 @@ import { RefreshTokenStrategy } from "./strategy/refreshToken.strategy";
 import { MailModule } from "src/mail/mail.module";
 import { AlbumsModule } from "src/albums/albums.module";
 
+@Global()
 @Module({
   controllers: [AuthController],
   providers: [AuthService,
@@ -16,7 +17,10 @@ import { AlbumsModule } from "src/albums/albums.module";
   imports: [
     forwardRef(() => UsersModule),
     forwardRef(() => AlbumsModule),
-    JwtModule.register({})
+    {
+      ...JwtModule.register({}),
+      global:true
+    }
   ],
   exports: [
     AuthService

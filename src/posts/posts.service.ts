@@ -14,6 +14,7 @@ import { Attachment } from "src/attachments/attachments.model";
 import { resolve } from "path";
 import { Op } from "sequelize";
 import { Photo } from "src/photos/photos.model";
+import { FilterPostParams } from "src/requestFeatures/filterPostParams copy";
 
 @Injectable()
 export class PostsService {
@@ -142,6 +143,21 @@ export class PostsService {
     ).catch(error => {throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");});
   }
 
+  async getPagedPosts(filters:FilterPostParams) 
+  {
+    const result = await this.postRepository.findAndCountAll
+    (
+      {
+        include:[{model: Attachment},{model: User,include: [{model:Photo}]}],
+        limit: filters.limit,
+        offset: filters.page *  filters.limit -  filters.limit,
+        order: [["createdAt", "DESC"]]
+      }
+    ).catch(error => {throw new InternalServerErrorException("Посты не найдены. Ошибка на стороне сервера.");});
+
+    return result;
+  }
+
   async getPagedPostByUserSubscriptions(userId: number, filters:FilterFeedParams) 
   {
     const user = await this.usersService.getUserById(userId).catch((error) => {
@@ -184,5 +200,9 @@ export class PostsService {
 
   async deletePost(id: number) {
     return await this.postRepository.destroy({ where: { id } });
+  }
+
+  async deletePosts(ids: Array<number>) {
+    return await this.postRepository.destroy({ where: {id: ids} });
   }
 }
