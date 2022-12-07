@@ -53,7 +53,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return this.messagesService.createMessage(body.dto,transaction).then(async (message) =>
     {
       const userData = await this.userService.getUserById(message.userId);
-      this.server.to(body.dto.dialogId.toString()).emit(ChatClientEvent.ReceiveMessage, {message,user:userData});
+      this.server.to(body.fromUserId.toString()).emit(ChatClientEvent.ReceiveMessage, 
+        {message,user:userData,dialogId:body.dto.dialogId});
+      this.server.to(body.toUserId.toString()).emit(ChatClientEvent.ReceiveMessage, 
+        {message,user:userData,dialogId:body.dto.dialogId});
 
     });
     
@@ -66,7 +69,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const messages = this.messagesService.getPagedMessagesByDialog(body.dialogId,body.filters);
     messages.then((messages) =>
     {
-      this.server.to(body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, messages);
+      this.server.to(body.auth.id.toString()).emit(ChatClientEvent.ReceiveMessage, {messages,dialogId:body.dialogId});
     })
   }
 
